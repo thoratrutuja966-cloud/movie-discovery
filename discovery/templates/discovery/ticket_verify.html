@@ -1,0 +1,12 @@
+{% extends 'discovery/base.html' %}
+{% block title %}Ticket verification · CineTrail{% endblock %}
+{% block content %}
+<section class="booking-history">
+  <div class="eyebrow">TICKET VERIFICATION</div>
+  {% if booking.status == 'confirmed' %}<h1>Valid booking</h1>{% else %}<h1>Booking {{ booking.get_status_display }}</h1>{% endif %}
+  <article class="booking-card"><div><h2>{{ booking.movie.title }}</h2>
+    {% if booking.showtime %}<p>{{ booking.showtime.theater.name }} · {{ booking.showtime.theater.city }} · {{ booking.showtime.starts_at|date:'D, M j · g:i A' }} · {{ booking.showtime.screen }}</p>{% endif %}
+    <p>Seats: {{ booking.seats|join:', '|default:'—' }}</p><small>Booking ID {{ booking.booking_id }}</small>
+  </div></article>
+</section>
+{% endblock %}

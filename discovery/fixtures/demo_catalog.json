@@ -1,0 +1,1402 @@
+[
+{
+  "model": "discovery.genre",
+  "pk": 1,
+  "fields": {
+    "name": "Action",
+    "slug": "action"
+  }
+},
+{
+  "model": "discovery.genre",
+  "pk": 2,
+  "fields": {
+    "name": "Adventure",
+    "slug": "adventure"
+  }
+},
+{
+  "model": "discovery.genre",
+  "pk": 3,
+  "fields": {
+    "name": "Comedy",
+    "slug": "comedy"
+  }
+},
+{
+  "model": "discovery.genre",
+  "pk": 4,
+  "fields": {
+    "name": "Drama",
+    "slug": "drama"
+  }
+},
+{
+  "model": "discovery.genre",
+  "pk": 5,
+  "fields": {
+    "name": "Fantasy",
+    "slug": "fantasy"
+  }
+},
+{
+  "model": "discovery.genre",
+  "pk": 6,
+  "fields": {
+    "name": "Sci-Fi",
+    "slug": "sci-fi"
+  }
+},
+{
+  "model": "discovery.genre",
+  "pk": 7,
+  "fields": {
+    "name": "Thriller",
+    "slug": "thriller"
+  }
+},
+{
+  "model": "discovery.genre",
+  "pk": 8,
+  "fields": {
+    "name": "Animation",
+    "slug": "animation"
+  }
+},
+{
+  "model": "discovery.genre",
+  "pk": 9,
+  "fields": {
+    "name": "Romance",
+    "slug": "romance"
+  }
+},
+{
+  "model": "discovery.movie",
+  "pk": 1,
+  "fields": {
+    "title": "Spider-Man: No Way Home",
+    "synopsis": "Peter Parker turns to Doctor Strange after his identity destroys the life he knows, but a magical mistake draws powerful outsiders into his world and forces him to confront what being Spider Man really means.",
+    "language": "English",
+    "release_date": "2025-06-15",
+    "rating": "8.7",
+    "popularity": 98,
+    "poster_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPt_dPTEs6RHOp73cI62Gz8fG8VdK83fZQYxLyKg7VyA&s=10",
+    "created_at": "2026-11-09T09:16:45.362Z",
+    "genres": [
+      6,
+      7
+    ]
+  }
+},
+{
+  "model": "discovery.movie",
+  "pk": 2,
+  "fields": {
+    "title": "Spider-Man: Brand New Day,",
+    "synopsis": "Peter Parker is now an adult living completely alone in New York City, having voluntarily erased his identity from the memories of everyone he loves to protect them. He operates as a full-time, neighborhood Spider-Man under total anonymity. However, the compounding pressure of his isolated life triggers a dangerous internal shift just as a powerful new enemy emerges to threaten the city, forcing Peter to confront what it truly means to be a hero when you have nothing left to lose.",
+    "language": "English",
+    "release_date": "2026-06-15",
+    "rating": "8.2",
+    "popularity": 91,
+    "poster_url": "https://static.wikia.nocookie.net/marvelmovies/images/7/75/Brand_New_Day_Dual_Poster.jpeg/revision/latest?cb=20260622182932",
+    "created_at": "2026-11-09T09:16:45.368Z",
+    "genres": [
+      4,
+      9
+    ]
+  }
+},
+{
+  "model": "discovery.movie",
+  "pk": 3,
+  "fields": {
+    "title": "Ramayana",
+    "synopsis": "An ancient epic follows a young prince and princess whose marriage and subsequent exile mark the beginning of a legendary journey. Their story of love, duty and destiny sets the stage for greater challenges ahead",
+    "language": "Hindi",
+    "release_date": "2026-11-15",
+    "rating": "7.9",
+    "popularity": 84,
+    "poster_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTWjicyzVbWOf64Q2KUegEN6m4qPfojyBrbZXIE9YZjWg&s=10",
+    "created_at": "2026-11-09T09:16:45.374Z",
+    "genres": [
+      2,
+      8
+    ]
+  }
+},
+{
+  "model": "discovery.movie",
+  "pk": 4,
+  "fields": {
+    "title": "One More Sunday",
+    "synopsis": "A chaotic family reunion turns into a city-wide treasure hunt.",
+    "language": "Hindi",
+    "release_date": "2024-06-15",
+    "rating": "7.6",
+    "popularity": 77,
+    "poster_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZknMToOCJlRhdJnzk85g2yNHoY1gsQuozUemUQKO81Q&s=10",
+    "created_at": "2026-11-09T09:16:45.380Z",
+    "genres": [
+      2,
+      3
+    ]
+  }
+},
+{
+  "model": "discovery.movie",
+  "pk": 5,
+  "fields": {
+    "title": "Blue Hour",
+    "synopsis": "A night-shift nurse uncovers a quiet conspiracy.",
+    "language": "English",
+    "release_date": "2026-06-15",
+    "rating": "8.4",
+    "popularity": 72,
+    "poster_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSI4F-ta6tN3gWWCgmz84w7lepKXEmSgocs6yrabD9STA&s=10",
+    "created_at": "2026-11-09T09:16:45.386Z",
+    "genres": [
+      4,
+      7
+    ]
+  }
+},
+{
+  "model": "discovery.movie",
+  "pk": 6,
+  "fields": {
+    "title": "Orbit Kids",
+    "synopsis": "A crew of school friends accidentally launches their science project.",
+    "language": "English",
+    "release_date": "2024-06-15",
+    "rating": "7.8",
+    "popularity": 69,
+    "poster_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrzK1CI00dkxvr4CMmjarjX2PwjscBVRwncOZMU2wrWg&s=10",
+    "created_at": "2026-11-09T09:16:45.391Z",
+    "genres": [
+      3,
+      6
+    ]
+  }
+},
+{
+  "model": "discovery.movie",
+  "pk": 7,
+  "fields": {
+    "title": "The Glass Kingdom",
+    "synopsis": "A cartographer journeys through a kingdom hidden in the clouds.",
+    "language": "Hindi",
+    "release_date": "2026-06-15",
+    "rating": "8.1",
+    "popularity": 63,
+    "poster_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSpKbC-pmIIFV1H7zBtEBnpRamPqyNM39a-KBFbsLkIAg&s=10",
+    "created_at": "2026-11-09T09:16:45.397Z",
+    "genres": [
+      2,
+      5
+    ]
+  }
+},
+{
+  "model": "discovery.movie",
+  "pk": 8,
+  "fields": {
+    "title": "oppenheimer",
+    "synopsis": "Oppenheimer is an epic biographical drama that tells the story of theoretical physicist J. Robert Oppenheimer, the \"father of the atomic bomb.\"\r\nThe film follows his leadership of the secret Manhattan Project at Los Alamos during World War II, culminating in the invention of the world's first nuclear weapon. It shifts between his race to build the bomb to save the world, and the political fallout and moral guilt he faces years later during the Cold War red scare, where his patriotism is put on trial.\r\nAt its core, it is a psychological character study about the terrifying burden of scientific creation.",
+    "language": "Hindi , English",
+    "release_date": "2024-06-15",
+    "rating": "7.5",
+    "popularity": 60,
+    "poster_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/4/4a/Oppenheimer_%28film%29.jpg/250px-Oppenheimer_%28film%29.jpg?utm_source=en.wikipedia.org&utm_campaign=parser&utm_content=thumbnail",
+    "created_at": "2026-11-09T09:16:45.402Z",
+    "genres": [
+      3,
+      4
+    ]
+  }
+},
+{
+  "model": "discovery.movie",
+  "pk": 9,
+  "fields": {
+    "title": "Wild India",
+    "synopsis": "Two men learn to confront a traumatic secret they share involving the savage murder of a schoolmate.",
+    "language": "English",
+    "release_date": "2023-06-15",
+    "rating": "7.7",
+    "popularity": 55,
+    "poster_url": "https://m.media-amazon.com/images/M/MV5BODliNWQzNzUtMTE5ZS00YzI5LTkxZGItZDIzNzY3YTFmNjM5XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+    "created_at": "2026-11-09T09:16:45.407Z",
+    "genres": [
+      1,
+      2
+    ]
+  }
+},
+{
+  "model": "discovery.movie",
+  "pk": 10,
+  "fields": {
+    "title": "Little Comets",
+    "synopsis": "A spirited animation about finding your place in the universe.",
+    "language": "English",
+    "release_date": "2025-06-15",
+    "rating": "8.6",
+    "popularity": 51,
+    "poster_url": "/static/discovery/posters/little-comets.svg",
+    "created_at": "2026-11-09T09:16:45.413Z",
+    "genres": [
+      5,
+      8
+    ]
+  }
+},
+{
+  "model": "discovery.movie",
+  "pk": 11,
+  "fields": {
+    "title": "Red Line",
+    "synopsis": "A detective has one train ride to stop a planned heist.",
+    "language": "Tamil",
+    "release_date": "2024-06-15",
+    "rating": "7.9",
+    "popularity": 49,
+    "poster_url": "/static/discovery/posters/red-line.svg",
+    "created_at": "2026-11-09T09:16:45.418Z",
+    "genres": [
+      1,
+      7
+    ]
+  }
+},
+{
+  "model": "discovery.movie",
+  "pk": 12,
+  "fields": {
+    "title": "A Map of Us",
+    "synopsis": "Old friends take the scenic route home after a wedding.",
+    "language": "Marathi",
+    "release_date": "2025-06-15",
+    "rating": "7.8",
+    "popularity": 44,
+    "poster_url": "/static/discovery/posters/a-map-of-us.svg",
+    "created_at": "2026-11-09T09:16:45.424Z",
+    "genres": [
+      3,
+      4
+    ]
+  }
+},
+{
+  "model": "discovery.theater",
+  "pk": 1,
+  "fields": {
+    "name": "CineSquare",
+    "city": "Mumbai"
+  }
+},
+{
+  "model": "discovery.theater",
+  "pk": 2,
+  "fields": {
+    "name": "Northstar Screens",
+    "city": "Delhi"
+  }
+},
+{
+  "model": "discovery.theater",
+  "pk": 3,
+  "fields": {
+    "name": "Riverwalk Cinema",
+    "city": "Pune"
+  }
+},
+{
+  "model": "discovery.theater",
+  "pk": 4,
+  "fields": {
+    "name": "Metroplex",
+    "city": "Bengaluru"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 1,
+  "fields": {
+    "movie": 1,
+    "theater": 1,
+    "starts_at": "2026-11-09T11:00:00Z",
+    "ticket_price": "220.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 2,
+  "fields": {
+    "movie": 1,
+    "theater": 2,
+    "starts_at": "2026-11-10T14:00:00Z",
+    "ticket_price": "260.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 3,
+  "fields": {
+    "movie": 2,
+    "theater": 1,
+    "starts_at": "2026-11-10T11:00:00Z",
+    "ticket_price": "245.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 4,
+  "fields": {
+    "movie": 2,
+    "theater": 2,
+    "starts_at": "2026-11-11T14:00:00Z",
+    "ticket_price": "285.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 5,
+  "fields": {
+    "movie": 2,
+    "theater": 3,
+    "starts_at": "2026-11-12T17:00:00Z",
+    "ticket_price": "325.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 6,
+  "fields": {
+    "movie": 3,
+    "theater": 1,
+    "starts_at": "2026-11-11T11:00:00Z",
+    "ticket_price": "270.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 7,
+  "fields": {
+    "movie": 3,
+    "theater": 2,
+    "starts_at": "2026-11-12T14:00:00Z",
+    "ticket_price": "310.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 8,
+  "fields": {
+    "movie": 3,
+    "theater": 3,
+    "starts_at": "2026-11-13T17:00:00Z",
+    "ticket_price": "350.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 9,
+  "fields": {
+    "movie": 3,
+    "theater": 4,
+    "starts_at": "2026-11-14T20:00:00Z",
+    "ticket_price": "390.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 10,
+  "fields": {
+    "movie": 4,
+    "theater": 1,
+    "starts_at": "2026-11-12T11:00:00Z",
+    "ticket_price": "295.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 11,
+  "fields": {
+    "movie": 4,
+    "theater": 2,
+    "starts_at": "2026-11-13T14:00:00Z",
+    "ticket_price": "335.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 12,
+  "fields": {
+    "movie": 5,
+    "theater": 1,
+    "starts_at": "2026-11-13T11:00:00Z",
+    "ticket_price": "320.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 13,
+  "fields": {
+    "movie": 5,
+    "theater": 2,
+    "starts_at": "2026-11-14T14:00:00Z",
+    "ticket_price": "360.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 14,
+  "fields": {
+    "movie": 5,
+    "theater": 3,
+    "starts_at": "2026-11-15T17:00:00Z",
+    "ticket_price": "400.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 15,
+  "fields": {
+    "movie": 6,
+    "theater": 1,
+    "starts_at": "2026-11-14T11:00:00Z",
+    "ticket_price": "345.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 16,
+  "fields": {
+    "movie": 6,
+    "theater": 2,
+    "starts_at": "2026-11-15T14:00:00Z",
+    "ticket_price": "385.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 17,
+  "fields": {
+    "movie": 6,
+    "theater": 3,
+    "starts_at": "2026-11-09T17:00:00Z",
+    "ticket_price": "425.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 18,
+  "fields": {
+    "movie": 6,
+    "theater": 4,
+    "starts_at": "2026-11-10T20:00:00Z",
+    "ticket_price": "465.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 19,
+  "fields": {
+    "movie": 7,
+    "theater": 1,
+    "starts_at": "2026-11-15T11:00:00Z",
+    "ticket_price": "370.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 20,
+  "fields": {
+    "movie": 7,
+    "theater": 2,
+    "starts_at": "2026-11-09T14:00:00Z",
+    "ticket_price": "410.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 21,
+  "fields": {
+    "movie": 8,
+    "theater": 1,
+    "starts_at": "2026-11-09T11:00:00Z",
+    "ticket_price": "395.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 22,
+  "fields": {
+    "movie": 8,
+    "theater": 2,
+    "starts_at": "2026-11-10T14:00:00Z",
+    "ticket_price": "435.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 23,
+  "fields": {
+    "movie": 8,
+    "theater": 3,
+    "starts_at": "2026-11-11T17:00:00Z",
+    "ticket_price": "475.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 24,
+  "fields": {
+    "movie": 9,
+    "theater": 1,
+    "starts_at": "2026-11-10T11:00:00Z",
+    "ticket_price": "420.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 25,
+  "fields": {
+    "movie": 9,
+    "theater": 2,
+    "starts_at": "2026-11-11T14:00:00Z",
+    "ticket_price": "460.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 26,
+  "fields": {
+    "movie": 9,
+    "theater": 3,
+    "starts_at": "2026-11-12T17:00:00Z",
+    "ticket_price": "500.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 27,
+  "fields": {
+    "movie": 9,
+    "theater": 4,
+    "starts_at": "2026-11-13T20:00:00Z",
+    "ticket_price": "540.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 28,
+  "fields": {
+    "movie": 10,
+    "theater": 1,
+    "starts_at": "2026-11-11T11:00:00Z",
+    "ticket_price": "445.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 29,
+  "fields": {
+    "movie": 10,
+    "theater": 2,
+    "starts_at": "2026-11-12T14:00:00Z",
+    "ticket_price": "485.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 30,
+  "fields": {
+    "movie": 11,
+    "theater": 1,
+    "starts_at": "2026-11-12T11:00:00Z",
+    "ticket_price": "470.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 31,
+  "fields": {
+    "movie": 11,
+    "theater": 2,
+    "starts_at": "2026-11-13T14:00:00Z",
+    "ticket_price": "510.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 32,
+  "fields": {
+    "movie": 11,
+    "theater": 3,
+    "starts_at": "2026-11-14T17:00:00Z",
+    "ticket_price": "550.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 33,
+  "fields": {
+    "movie": 12,
+    "theater": 1,
+    "starts_at": "2026-11-13T11:00:00Z",
+    "ticket_price": "495.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 34,
+  "fields": {
+    "movie": 12,
+    "theater": 2,
+    "starts_at": "2026-11-14T14:00:00Z",
+    "ticket_price": "535.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 35,
+  "fields": {
+    "movie": 12,
+    "theater": 3,
+    "starts_at": "2026-11-15T17:00:00Z",
+    "ticket_price": "575.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 36,
+  "fields": {
+    "movie": 12,
+    "theater": 4,
+    "starts_at": "2026-11-09T20:00:00Z",
+    "ticket_price": "615.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 37,
+  "fields": {
+    "movie": 1,
+    "theater": 1,
+    "starts_at": "2026-11-09T12:00:00Z",
+    "ticket_price": "220.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 38,
+  "fields": {
+    "movie": 1,
+    "theater": 2,
+    "starts_at": "2026-11-10T15:00:00Z",
+    "ticket_price": "260.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 39,
+  "fields": {
+    "movie": 2,
+    "theater": 1,
+    "starts_at": "2026-11-10T12:00:00Z",
+    "ticket_price": "245.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 40,
+  "fields": {
+    "movie": 2,
+    "theater": 2,
+    "starts_at": "2026-11-11T15:00:00Z",
+    "ticket_price": "285.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 41,
+  "fields": {
+    "movie": 2,
+    "theater": 3,
+    "starts_at": "2026-11-12T18:00:00Z",
+    "ticket_price": "325.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 42,
+  "fields": {
+    "movie": 3,
+    "theater": 1,
+    "starts_at": "2026-11-11T12:00:00Z",
+    "ticket_price": "270.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 43,
+  "fields": {
+    "movie": 3,
+    "theater": 2,
+    "starts_at": "2026-11-12T15:00:00Z",
+    "ticket_price": "310.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 44,
+  "fields": {
+    "movie": 3,
+    "theater": 3,
+    "starts_at": "2026-11-13T18:00:00Z",
+    "ticket_price": "350.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 45,
+  "fields": {
+    "movie": 3,
+    "theater": 4,
+    "starts_at": "2026-11-14T21:00:00Z",
+    "ticket_price": "390.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 46,
+  "fields": {
+    "movie": 4,
+    "theater": 1,
+    "starts_at": "2026-11-12T12:00:00Z",
+    "ticket_price": "295.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 47,
+  "fields": {
+    "movie": 4,
+    "theater": 2,
+    "starts_at": "2026-11-13T15:00:00Z",
+    "ticket_price": "335.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 48,
+  "fields": {
+    "movie": 5,
+    "theater": 1,
+    "starts_at": "2026-11-13T12:00:00Z",
+    "ticket_price": "320.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 49,
+  "fields": {
+    "movie": 5,
+    "theater": 2,
+    "starts_at": "2026-11-14T15:00:00Z",
+    "ticket_price": "360.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 50,
+  "fields": {
+    "movie": 5,
+    "theater": 3,
+    "starts_at": "2026-11-15T18:00:00Z",
+    "ticket_price": "400.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 51,
+  "fields": {
+    "movie": 6,
+    "theater": 1,
+    "starts_at": "2026-11-14T12:00:00Z",
+    "ticket_price": "345.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 52,
+  "fields": {
+    "movie": 6,
+    "theater": 2,
+    "starts_at": "2026-11-15T15:00:00Z",
+    "ticket_price": "385.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 53,
+  "fields": {
+    "movie": 6,
+    "theater": 3,
+    "starts_at": "2026-11-09T18:00:00Z",
+    "ticket_price": "425.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 54,
+  "fields": {
+    "movie": 6,
+    "theater": 4,
+    "starts_at": "2026-11-10T21:00:00Z",
+    "ticket_price": "465.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 55,
+  "fields": {
+    "movie": 7,
+    "theater": 1,
+    "starts_at": "2026-11-15T12:00:00Z",
+    "ticket_price": "370.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 56,
+  "fields": {
+    "movie": 7,
+    "theater": 2,
+    "starts_at": "2026-11-09T15:00:00Z",
+    "ticket_price": "410.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 57,
+  "fields": {
+    "movie": 8,
+    "theater": 1,
+    "starts_at": "2026-11-09T12:00:00Z",
+    "ticket_price": "395.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 58,
+  "fields": {
+    "movie": 8,
+    "theater": 2,
+    "starts_at": "2026-11-10T15:00:00Z",
+    "ticket_price": "435.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 59,
+  "fields": {
+    "movie": 8,
+    "theater": 3,
+    "starts_at": "2026-11-11T18:00:00Z",
+    "ticket_price": "475.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 60,
+  "fields": {
+    "movie": 9,
+    "theater": 1,
+    "starts_at": "2026-11-10T12:00:00Z",
+    "ticket_price": "420.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 61,
+  "fields": {
+    "movie": 9,
+    "theater": 2,
+    "starts_at": "2026-11-11T15:00:00Z",
+    "ticket_price": "460.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 62,
+  "fields": {
+    "movie": 9,
+    "theater": 3,
+    "starts_at": "2026-11-12T18:00:00Z",
+    "ticket_price": "500.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 63,
+  "fields": {
+    "movie": 9,
+    "theater": 4,
+    "starts_at": "2026-11-13T21:00:00Z",
+    "ticket_price": "540.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 64,
+  "fields": {
+    "movie": 10,
+    "theater": 1,
+    "starts_at": "2026-11-11T12:00:00Z",
+    "ticket_price": "445.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 65,
+  "fields": {
+    "movie": 10,
+    "theater": 2,
+    "starts_at": "2026-11-12T15:00:00Z",
+    "ticket_price": "485.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 66,
+  "fields": {
+    "movie": 11,
+    "theater": 1,
+    "starts_at": "2026-11-12T12:00:00Z",
+    "ticket_price": "470.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 67,
+  "fields": {
+    "movie": 11,
+    "theater": 2,
+    "starts_at": "2026-11-13T15:00:00Z",
+    "ticket_price": "510.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 68,
+  "fields": {
+    "movie": 11,
+    "theater": 3,
+    "starts_at": "2026-11-14T18:00:00Z",
+    "ticket_price": "550.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 69,
+  "fields": {
+    "movie": 12,
+    "theater": 1,
+    "starts_at": "2026-11-13T12:00:00Z",
+    "ticket_price": "495.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 70,
+  "fields": {
+    "movie": 12,
+    "theater": 2,
+    "starts_at": "2026-11-14T15:00:00Z",
+    "ticket_price": "535.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 71,
+  "fields": {
+    "movie": 12,
+    "theater": 3,
+    "starts_at": "2026-11-15T18:00:00Z",
+    "ticket_price": "575.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 72,
+  "fields": {
+    "movie": 12,
+    "theater": 4,
+    "starts_at": "2026-11-09T21:00:00Z",
+    "ticket_price": "615.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 73,
+  "fields": {
+    "movie": 1,
+    "theater": 1,
+    "starts_at": "2026-11-09T13:00:00Z",
+    "ticket_price": "220.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 74,
+  "fields": {
+    "movie": 1,
+    "theater": 2,
+    "starts_at": "2026-11-10T16:00:00Z",
+    "ticket_price": "260.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 75,
+  "fields": {
+    "movie": 2,
+    "theater": 1,
+    "starts_at": "2026-11-10T13:00:00Z",
+    "ticket_price": "245.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 76,
+  "fields": {
+    "movie": 2,
+    "theater": 2,
+    "starts_at": "2026-11-11T16:00:00Z",
+    "ticket_price": "285.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 77,
+  "fields": {
+    "movie": 2,
+    "theater": 3,
+    "starts_at": "2026-11-12T19:00:00Z",
+    "ticket_price": "325.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 78,
+  "fields": {
+    "movie": 3,
+    "theater": 1,
+    "starts_at": "2026-11-11T13:00:00Z",
+    "ticket_price": "270.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 79,
+  "fields": {
+    "movie": 3,
+    "theater": 2,
+    "starts_at": "2026-11-12T16:00:00Z",
+    "ticket_price": "310.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 80,
+  "fields": {
+    "movie": 3,
+    "theater": 3,
+    "starts_at": "2026-11-13T19:00:00Z",
+    "ticket_price": "350.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 81,
+  "fields": {
+    "movie": 3,
+    "theater": 4,
+    "starts_at": "2026-11-14T22:00:00Z",
+    "ticket_price": "390.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 82,
+  "fields": {
+    "movie": 4,
+    "theater": 1,
+    "starts_at": "2026-11-12T13:00:00Z",
+    "ticket_price": "295.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 83,
+  "fields": {
+    "movie": 4,
+    "theater": 2,
+    "starts_at": "2026-11-13T16:00:00Z",
+    "ticket_price": "335.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 84,
+  "fields": {
+    "movie": 5,
+    "theater": 1,
+    "starts_at": "2026-11-13T13:00:00Z",
+    "ticket_price": "320.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 85,
+  "fields": {
+    "movie": 5,
+    "theater": 2,
+    "starts_at": "2026-11-14T16:00:00Z",
+    "ticket_price": "360.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 86,
+  "fields": {
+    "movie": 5,
+    "theater": 3,
+    "starts_at": "2026-11-15T19:00:00Z",
+    "ticket_price": "400.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 87,
+  "fields": {
+    "movie": 6,
+    "theater": 1,
+    "starts_at": "2026-11-14T13:00:00Z",
+    "ticket_price": "345.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 88,
+  "fields": {
+    "movie": 6,
+    "theater": 2,
+    "starts_at": "2026-11-15T16:00:00Z",
+    "ticket_price": "385.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 89,
+  "fields": {
+    "movie": 6,
+    "theater": 3,
+    "starts_at": "2026-11-09T19:00:00Z",
+    "ticket_price": "425.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 90,
+  "fields": {
+    "movie": 6,
+    "theater": 4,
+    "starts_at": "2026-11-10T22:00:00Z",
+    "ticket_price": "465.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 91,
+  "fields": {
+    "movie": 7,
+    "theater": 1,
+    "starts_at": "2026-11-15T13:00:00Z",
+    "ticket_price": "370.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 92,
+  "fields": {
+    "movie": 7,
+    "theater": 2,
+    "starts_at": "2026-11-09T16:00:00Z",
+    "ticket_price": "410.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 93,
+  "fields": {
+    "movie": 8,
+    "theater": 1,
+    "starts_at": "2026-11-09T13:00:00Z",
+    "ticket_price": "395.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 94,
+  "fields": {
+    "movie": 8,
+    "theater": 2,
+    "starts_at": "2026-11-10T16:00:00Z",
+    "ticket_price": "435.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 95,
+  "fields": {
+    "movie": 8,
+    "theater": 3,
+    "starts_at": "2026-11-11T19:00:00Z",
+    "ticket_price": "475.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 96,
+  "fields": {
+    "movie": 9,
+    "theater": 1,
+    "starts_at": "2026-11-10T13:00:00Z",
+    "ticket_price": "420.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 97,
+  "fields": {
+    "movie": 9,
+    "theater": 2,
+    "starts_at": "2026-11-11T16:00:00Z",
+    "ticket_price": "460.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 98,
+  "fields": {
+    "movie": 9,
+    "theater": 3,
+    "starts_at": "2026-11-12T19:00:00Z",
+    "ticket_price": "500.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 99,
+  "fields": {
+    "movie": 9,
+    "theater": 4,
+    "starts_at": "2026-11-13T22:00:00Z",
+    "ticket_price": "540.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 100,
+  "fields": {
+    "movie": 10,
+    "theater": 1,
+    "starts_at": "2026-11-11T13:00:00Z",
+    "ticket_price": "445.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 101,
+  "fields": {
+    "movie": 10,
+    "theater": 2,
+    "starts_at": "2026-11-12T16:00:00Z",
+    "ticket_price": "485.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 102,
+  "fields": {
+    "movie": 11,
+    "theater": 1,
+    "starts_at": "2026-11-12T13:00:00Z",
+    "ticket_price": "470.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 103,
+  "fields": {
+    "movie": 11,
+    "theater": 2,
+    "starts_at": "2026-11-13T16:00:00Z",
+    "ticket_price": "510.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 104,
+  "fields": {
+    "movie": 11,
+    "theater": 3,
+    "starts_at": "2026-11-14T19:00:00Z",
+    "ticket_price": "550.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 105,
+  "fields": {
+    "movie": 12,
+    "theater": 1,
+    "starts_at": "2026-11-13T13:00:00Z",
+    "ticket_price": "495.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 106,
+  "fields": {
+    "movie": 12,
+    "theater": 2,
+    "starts_at": "2026-11-14T16:00:00Z",
+    "ticket_price": "535.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 107,
+  "fields": {
+    "movie": 12,
+    "theater": 3,
+    "starts_at": "2026-11-15T19:00:00Z",
+    "ticket_price": "575.00"
+  }
+},
+{
+  "model": "discovery.showtime",
+  "pk": 108,
+  "fields": {
+    "movie": 12,
+    "theater": 4,
+    "starts_at": "2026-11-09T22:00:00Z",
+    "ticket_price": "615.00"
+  }
+}
+]

@@ -1,0 +1,19 @@
+{% extends 'discovery/base.html' %}
+{% block title %}My tickets · CineTrail{% endblock %}
+{% block content %}
+<section class="booking-history">
+  <div class="eyebrow">YOUR CINE NIGHTS</div>
+  <h1>My bookings</h1>
+  {% if booked %}<p class="booking-notice">Demo booking confirmed. {% if email_queued %}Your ticket email is queued for delivery.{% else %}Email queue is unavailable right now; you can download the PDF below.{% endif %}</p>{% endif %}
+  {% for booking in bookings %}
+    <article class="booking-card">
+      <div><span class="eyebrow">{{ booking.get_status_display }}</span><h2>{{ booking.movie.title }}</h2>
+        {% if booking.showtime %}<p>{{ booking.showtime.theater.name }} · {{ booking.showtime.theater.city }} · {{ booking.showtime.starts_at|date:'D, M j · g:i A' }}</p>{% endif %}
+        <p>Seats: {{ booking.seats|join:', '|default:'—' }} · Total: ₹{{ booking.total_amount|floatformat:2 }}</p>
+        <small>Booking {{ booking.booking_id }} · Payment ref {{ booking.payment_reference }}</small>
+      </div>
+      {% if booking.status == 'confirmed' %}<a class="ticket-download" href="{% url 'ticket_download' booking.pk %}">Download PDF ticket</a>{% endif %}
+    </article>
+  {% empty %}<p>You don’t have any bookings yet. Pick a film and reserve a showtime to see tickets here.</p>{% endfor %}
+</section>
+{% endblock %}

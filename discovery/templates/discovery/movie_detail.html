@@ -1,0 +1,31 @@
+{% extends 'discovery/base.html' %}
+{% block title %}{{ movie.title }} · CineTrail{% endblock %}
+{% block content %}
+<section class="detail-hero">
+  <a href="{% url 'movie_list' %}" class="back">← Back to discovery</a>
+  <div class="detail-layout">
+    <div class="detail-poster">
+      {% if movie.poster_url %}<img class="uploaded-poster" src="{{ movie.poster_url }}" alt="{{ movie.title }} poster" onerror="this.remove()">{% endif %}
+      <div class="poster-art art-4"><span class="poster-mark">✦</span><span class="poster-title">{{ movie.title|upper }}</span><span class="poster-sub">A STORY WORTH SEEING</span></div>
+    </div>
+    <div class="detail-copy">
+      <div class="eyebrow muted">{{ movie.language }} FILM · {{ movie.release_date|date:'Y' }}</div>
+      <h1>{{ movie.title }}</h1><div class="detail-rating">★ {{ movie.rating }} <span>·</span> {{ movie.genres.all|join:', ' }}</div>
+      <p>{{ movie.synopsis }}</p><h3 id="showtimes">Showtimes near you</h3>
+      {% for show in showtimes %}
+        <div class="showtime"><span><b>{{ show.theater.name }}</b><small>{{ show.theater.city }} · {{ show.starts_at|date:'D, M j · g:i A' }} · {{ show.screen }}</small></span><span>₹{{ show.ticket_price|floatformat:0 }}</span></div>
+        {% if user.is_authenticated %}
+          <form class="booking-form" method="post" action="{% url 'create_demo_booking' show.pk %}">
+            {% csrf_token %}<label for="seats-{{ show.pk }}">Seats (comma separated, up to 8)</label>
+            <div class="booking-controls"><input id="seats-{{ show.pk }}" name="seats" placeholder="A1, A2" required maxlength="40"><button type="submit">Confirm demo booking</button></div>
+            <small>Demo only: no payment is processed. Payment verification is part of a later task.</small>
+          </form>
+        {% else %}<p><a href="{% url 'login' %}?next={{ request.path }}">Sign in</a> to make a demo booking.</p>{% endif %}
+      {% empty %}<p>No upcoming shows. Check back soon.</p>{% endfor %}
+    </div>
+  </div>
+</section>
+<section class="recommendations"><div class="eyebrow muted">MORE LIKE THIS</div><h2>Keep the <em>good stories going.</em></h2><div class="recommend-row">
+  {% for item in similar %}<a class="recommend-chip" href="{% url 'movie_detail' item.pk %}"><span class="rec-icon">✦</span><span><b>{{ item.title }}</b><small>{{ item.genres.all.0.name }} · ★ {{ item.rating }}</small></span><span class="arrow">↗</span></a>{% empty %}<p>More picks coming soon.</p>{% endfor %}
+</div></section>
+{% endblock %}
