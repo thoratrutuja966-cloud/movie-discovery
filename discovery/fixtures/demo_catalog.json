@@ -201,16 +201,15 @@
   "model": "discovery.movie",
   "pk": 8,
   "fields": {
-    "title": "oppenheimer",
-    "synopsis": "Oppenheimer is an epic biographical drama that tells the story of theoretical physicist J. Robert Oppenheimer, the \"father of the atomic bomb.\"\r\nThe film follows his leadership of the secret Manhattan Project at Los Alamos during World War II, culminating in the invention of the world's first nuclear weapon. It shifts between his race to build the bomb to save the world, and the political fallout and moral guilt he faces years later during the Cold War red scare, where his patriotism is put on trial.\r\nAt its core, it is a psychological character study about the terrifying burden of scientific creation.",
-    "language": "Hindi , English",
-    "release_date": "2024-06-15",
+    "title": "Oppenheimer",
+    "synopsis": "Christopher Nolan's biographical drama follows theoretical physicist J. Robert Oppenheimer and the Manhattan Project during World War II, then explores the political fallout and moral consequences of the atomic bomb.",
+    "language": "English",
+    "release_date": "2023-07-21",
     "rating": "7.5",
     "popularity": 60,
     "poster_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/4/4a/Oppenheimer_%28film%29.jpg/250px-Oppenheimer_%28film%29.jpg?utm_source=en.wikipedia.org&utm_campaign=parser&utm_content=thumbnail",
     "created_at": "2026-11-09T09:16:45.402Z",
     "genres": [
-      3,
       4
     ]
   }
