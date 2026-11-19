@@ -7,12 +7,12 @@
   {% if booked %}<p class="booking-notice">Demo booking confirmed. {% if email_queued %}Your ticket email is queued for delivery.{% else %}Email queue is unavailable right now; you can download the PDF below.{% endif %}</p>{% endif %}
   {% for booking in bookings %}
     <article class="booking-card">
-      <div><span class="eyebrow">{{ booking.get_status_display }}</span><h2>{{ booking.movie.title }}</h2>
+      <div><span class="eyebrow">{{ booking.get_status_display }}</span><h2><a href="{% url 'movie_detail' booking.movie_id %}">{{ booking.movie.title }}</a></h2>
         {% if booking.showtime %}<p>{{ booking.showtime.theater.name }} · {{ booking.showtime.theater.city }} · {{ booking.showtime.starts_at|date:'D, M j · g:i A' }}</p>{% endif %}
         <p>Seats: {{ booking.seats|join:', '|default:'—' }} · Total: ₹{{ booking.total_amount|floatformat:2 }}</p>
         <small>Booking {{ booking.booking_id }} · Payment ref {{ booking.payment_reference }}</small>
       </div>
-      {% if booking.status == 'confirmed' %}<a class="ticket-download" href="{% url 'ticket_download' booking.pk %}">Download PDF ticket</a>{% endif %}
+      <div class="booking-actions">{% if booking.can_mark_watched %}<form method="post" action="{% url 'mark_movie_watched' booking.pk %}">{% csrf_token %}<button class="ticket-download" type="submit">Mark watched &amp; review</button></form>{% endif %}{% if booking.status == 'confirmed' %}<a class="ticket-download" href="{% url 'ticket_download' booking.pk %}">Download PDF ticket</a>{% endif %}</div>
     </article>
   {% empty %}<p>You don’t have any bookings yet. Pick a film and reserve a showtime to see tickets here.</p>{% endfor %}
 </section>

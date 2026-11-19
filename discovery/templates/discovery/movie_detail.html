@@ -4,14 +4,22 @@
 <section class="detail-hero">
   <a href="{% url 'movie_list' %}" class="back">← Back to discovery</a>
   <div class="detail-layout">
-    <div class="detail-poster">
-      {% if movie.poster_url %}<img class="uploaded-poster" src="{{ movie.poster_url }}" alt="{{ movie.title }} poster" onerror="this.remove()">{% endif %}
-      <div class="poster-art art-4"><span class="poster-mark">✦</span><span class="poster-title">{{ movie.title|upper }}</span><span class="poster-sub">A STORY WORTH SEEING</span></div>
+    <div>
+      <div class="detail-poster">
+        {% if movie.poster_url %}<img class="uploaded-poster" src="{{ movie.poster_url }}" alt="{{ movie.title }} poster" onerror="this.remove()">{% endif %}
+        <div class="poster-art art-4"><span class="poster-mark">✦</span><span class="poster-title">{{ movie.title|upper }}</span><span class="poster-sub">A STORY WORTH SEEING</span></div>
+      </div>
+      {% if movie.poster_images.all %}<div class="poster-gallery" aria-label="More posters">{% for poster in movie.poster_images.all %}<img src="{{ poster.image_url }}" alt="{{ poster.alt_text|default:movie.title }}" loading="lazy">{% endfor %}</div>{% endif %}
     </div>
     <div class="detail-copy">
-      <div class="eyebrow muted">{{ movie.language }} FILM · {{ movie.release_date|date:'Y' }}</div>
-      <h1>{{ movie.title }}</h1><div class="detail-rating">★ {{ movie.rating }} <span>·</span> {{ movie.genres.all|join:', ' }}</div>
-      <p>{{ movie.synopsis }}</p><h3 id="showtimes">Showtimes near you</h3>
+      <div class="eyebrow muted">{{ movie.languages.all|join:', ' }} FILM · {{ movie.release_date|date:'Y' }}</div>
+      <h1>{{ movie.title }}</h1>
+      <div class="detail-rating">★ {{ movie.rating }} <span>·</span> {{ movie.genres.all|join:', ' }}{% if review_count %}<small> · {{ review_count }} viewer review{{ review_count|pluralize }}</small>{% endif %}</div>
+      <div class="movie-meta">{% if movie.certification %}<span>{{ movie.certification }}</span>{% endif %}{% if movie.duration_minutes %}<span>{{ movie.duration_minutes }} min</span>{% endif %}</div>
+      <p>{{ movie.description|default:movie.synopsis }}</p>
+      {% if movie.cast_members.all %}<div class="cast-list"><b>Cast</b><span>{% for member in movie.cast_members.all %}{{ member.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></div>{% endif %}
+      {% if movie.trailer_embed_url %}<section class="trailer-block"><h3>Official trailer</h3><div class="trailer-frame"><iframe src="{{ movie.trailer_embed_url }}" title="{{ movie.title }} trailer" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-presentation" allow="accelerometer; encrypted-media; picture-in-picture; web-share" allowfullscreen></iframe></div></section>{% elif movie.trailer_link_url %}<p class="trailer-link"><a href="{{ movie.trailer_link_url }}" target="_blank" rel="noopener noreferrer">Find a trailer on YouTube ↗</a></p>{% endif %}
+      <h3 id="showtimes">Showtimes near you</h3>
       {% for show in showtimes %}
         <div class="showtime"><span><b>{{ show.theater.name }}</b><small>{{ show.theater.city }} · {{ show.starts_at|date:'D, M j · g:i A' }} · {{ show.screen }}</small></span><span>₹{{ show.ticket_price|floatformat:0 }}</span></div>
         {% if user.is_authenticated %}
@@ -25,7 +33,21 @@
     </div>
   </div>
 </section>
-<section class="recommendations"><div class="eyebrow muted">MORE LIKE THIS</div><h2>Keep the <em>good stories going.</em></h2><div class="recommend-row">
-  {% for item in similar %}<a class="recommend-chip" href="{% url 'movie_detail' item.pk %}"><span class="rec-icon">✦</span><span><b>{{ item.title }}</b><small>{{ item.genres.all.0.name }} · ★ {{ item.rating }}</small></span><span class="arrow">↗</span></a>{% empty %}<p>More picks coming soon.</p>{% endfor %}
-</div></section>
+
+<section class="detail-extra" id="reviews">
+  <div class="eyebrow muted">VIEWER NOTES</div><h2>Ratings &amp; <em>reviews.</em></h2>
+  {% if user.is_authenticated %}
+    {% for booking in pending_watches %}<div class="watch-prompt"><div><b>Did you watch {{ movie.title }}?</b><small>{{ booking.showtime.theater.name }} · {{ booking.showtime.starts_at|date:'D, M j · g:i A' }}</small></div><form method="post" action="{% url 'mark_movie_watched' booking.pk %}">{% csrf_token %}<button type="submit">Mark watched</button></form></div>{% endfor %}
+    {% if can_review %}<form class="review-form" method="post" action="{% url 'submit_movie_review' movie.pk %}">{% csrf_token %}<h3>{% if review_form.instance.pk %}Edit your review{% else %}Share your review{% endif %}</h3>{{ review_form.non_field_errors }}<label for="id_rating">Your rating (1–10)</label>{{ review_form.rating }}{{ review_form.rating.errors }}<label for="id_text">Your review</label>{{ review_form.text }}{{ review_form.text.errors }}<button type="submit">Save review</button></form>
+    {% else %}<p class="review-gate">Reviews unlock after a confirmed showtime has finished and you mark that booking as watched.</p>{% endif %}
+  {% else %}<p><a href="{% url 'login' %}?next={{ request.path }}">Sign in</a> to review this movie after watching it.</p>{% endif %}
+  <div class="review-list">
+    {% for review in reviews %}<article class="review-card"><div class="review-heading"><div><b>{{ review.user.get_full_name|default:review.user.username }}</b><span class="verified-badge">✓ Verified viewer</span></div><strong>★ {{ review.rating }}/10</strong></div><p>{{ review.text|linebreaksbr }}</p><small>Updated {{ review.updated_at|date:'M j, Y' }}</small>{% if user.is_authenticated and review.user_id != user.id %}<details class="report-review"><summary>Report review</summary><form method="post" action="{% url 'report_movie_review' review.pk %}">{% csrf_token %}{{ report_form.reason }}{{ report_form.details }}<button type="submit">Send report</button></form></details>{% endif %}</article>
+    {% empty %}<p>No reviews yet. Be the first verified viewer to share one.</p>{% endfor %}
+  </div>
+</section>
+
+{% if similar %}<section class="recommendations detail-recommendations"><div class="eyebrow muted">SAME GENRE &amp; LANGUAGE</div><h2>More like <em>this.</em></h2><div class="recommend-row">{% for item in similar %}<a class="recommend-chip" href="{% url 'movie_detail' item.pk %}"><span class="rec-icon">✦</span><span><b>{{ item.title }}</b><small>{{ item.languages.all|join:', ' }} · {{ item.genres.all.0.name }}</small></span><span class="arrow">↗</span></a>{% endfor %}</div></section>{% endif %}
+<section class="recommendations detail-recommendations"><div class="eyebrow muted">POPULAR WITH VIEWERS</div><h2>Trending <em>now.</em></h2><div class="recommend-row">{% for item in trending %}<a class="recommend-chip" href="{% url 'movie_detail' item.pk %}"><span class="rec-icon">✦</span><span><b>{{ item.title }}</b><small>★ {{ item.rating }} · {{ item.languages.all|join:', ' }}</small></span><span class="arrow">↗</span></a>{% empty %}<p>More picks coming soon.</p>{% endfor %}</div></section>
+<section class="recommendations detail-recommendations"><div class="eyebrow muted">FRESH RELEASES</div><h2>Recently <em>released.</em></h2><div class="recommend-row">{% for item in recent_releases %}<a class="recommend-chip" href="{% url 'movie_detail' item.pk %}"><span class="rec-icon">✦</span><span><b>{{ item.title }}</b><small>{{ item.release_date|date:'M Y' }} · {{ item.languages.all|join:', ' }}</small></span><span class="arrow">↗</span></a>{% empty %}<p>More picks coming soon.</p>{% endfor %}</div></section>
 {% endblock %}

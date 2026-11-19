@@ -68,3 +68,10 @@ The sample catalog is illustrative. `BookingHistory` is a lightweight demo recor
 **Outcomes and impact.** The deliverable includes a discovery page, sample catalog loader, movie details, and an admin-managed catalog. Selected indexes and prefetching support query efficiency. No benchmark was run because the sample data is not representative of production scale.
 
 **Feedback, evidence, and conclusion.** Source code and the seed command provide reviewable evidence. Before final submission, integrate the course application's catalog and confirmed bookings and measure performance with its data. No internship feedback or measured performance results are claimed here.
+
+## Task 3: movie management, trailers, and verified reviews
+
+Django Admin manages movies, genres, languages, cast, theaters, showtimes, and multiple poster image URLs. Movie records include long descriptions, YouTube trailers, certification, and runtime. Trailer URLs are embedded only from approved YouTube hosts using the privacy-enhanced player.
+
+Run python manage.py enrich_task3_movies to populate the ten Task 3 demo titles with details. The invented CineTrail stories use sample cast and demo certifications; where there is no verified official video, the trailer button opens a YouTube search rather than embedding an unrelated trailer. Signed-in users can mark a confirmed booking watched after its showtime and runtime have passed, then submit or edit a review. Administrators can moderate reported reviews in Django Admin.
+

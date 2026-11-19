@@ -2,7 +2,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from discovery.models import Genre, Movie, Showtime, Theater
+from discovery.models import Genre, Language, Movie, Showtime, Theater
 
 class Command(BaseCommand):
     help = "Load a small local demo catalogue for the movie discovery page."
@@ -24,7 +24,9 @@ class Command(BaseCommand):
             ("A Map of Us", "Old friends take the scenic route home after a wedding.", "Marathi", 2025, 7.8, 44, ["Drama", "Comedy"], "a-map-of-us.svg"),
         ]
         for title, synopsis, language, year, rating, popularity, tags, poster in data:
-            movie, _ = Movie.objects.update_or_create(title=title, defaults={"synopsis": synopsis, "language": language, "release_date": date(year, 6, 15), "rating": Decimal(str(rating)), "popularity": popularity, "poster_url": f"/static/discovery/posters/{poster}"})
+            language_rows = [Language.objects.get_or_create(name=name.strip())[0] for name in language.split(",") if name.strip()]
+            movie, _ = Movie.objects.update_or_create(title=title, defaults={"synopsis": synopsis, "language": ", ".join(item.name for item in language_rows), "release_date": date(year, 6, 15), "rating": Decimal(str(rating)), "catalog_rating": Decimal(str(rating)), "popularity": popularity, "poster_url": f"/static/discovery/posters/{poster}"})
+            movie.languages.set(language_rows)
             movie.genres.set([genres[t] for t in tags if t in genres])
         theaters = [Theater.objects.get_or_create(name=name, city=city)[0] for name, city in [("CineSquare", "Mumbai"), ("Northstar Screens", "Delhi"), ("Riverwalk Cinema", "Pune"), ("Metroplex", "Bengaluru")]]
         now = timezone.now().replace(minute=0, second=0, microsecond=0)
