@@ -17,7 +17,7 @@ class Command(BaseCommand):
                 "title": "Wild India", "language": ["English"], "genres": ["Documentary", "Nature"],
                 "cast": ["Joseph Bader"], "certification": "U", "duration": 44,
                 "description": "A wildlife documentary exploring India's varied habitats, from mountain landscapes to forests and dry grasslands, and the animals adapted to survive in them.",
-                "trailer": "search", "poster": "https://m.media-amazon.com/images/M/MV5BODliNWQzNzUtMTE5ZS00YzI5LTkxZGItZDIzNzY3YTFmNjM5XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+                "trailer": "search", "poster": "/static/discovery/posters/wild-india.jpg",
             },
             {
                 "title": "Oppenheimer", "language": ["English", "Hindi"], "genres": ["Biography", "Drama", "History"],
@@ -25,7 +25,7 @@ class Command(BaseCommand):
                 "certification": "A (India) / R (US)", "duration": 180,
                 "description": "Christopher Nolan's historical drama follows physicist J. Robert Oppenheimer and the scientists of the Manhattan Project, then examines the political and personal consequences of building the atomic bomb.",
                 "trailer": "https://www.youtube.com/watch?v=bK6ldnjE3Y0",
-                "poster": "https://pics.filmaffinity.com/oppenheimer-389531177-large.jpg",
+                "poster": "/static/discovery/posters/oppenheimer.jpg",
             },
             {
                 "title": "The Glass Kingdom", "language": ["Hindi"], "genres": ["Fantasy", "Adventure"],
@@ -85,7 +85,7 @@ class Command(BaseCommand):
                 "certification": "PG-13 (US)", "duration": 145,
                 "description": "Peter Parker fights crime full-time in a city that has forgotten his identity. As his isolated life begins to change him, a new threat forces him to protect the people who no longer know him.",
                 "trailer": "https://www.youtube.com/watch?v=62bIsvRcPv0",
-                "poster": "https://imgix.hoyts.com.au/mx/posters/au/smbnd-tsr-reflection-a4poster-1920px.jpg",
+                "poster": "/static/discovery/posters/spider-man-brand-new-day.jpg",
             },
         ]
 

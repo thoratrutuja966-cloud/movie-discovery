@@ -81,7 +81,7 @@
     "release_date": "2025-06-15",
     "rating": "8.7",
     "popularity": 98,
-    "poster_url": "https://image.tmdb.org/t/p/w500/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg",
+    "poster_url": "/static/discovery/posters/spider-man-no-way-home.jpg",
     "created_at": "2026-11-09T09:16:45.362Z",
     "genres": [
       6,
@@ -99,7 +99,7 @@
     "release_date": "2026-06-15",
     "rating": "8.2",
     "popularity": 91,
-    "poster_url": "https://static.wikia.nocookie.net/marvelmovies/images/7/75/Brand_New_Day_Dual_Poster.jpeg/revision/latest?cb=20260622182932",
+    "poster_url": "/static/discovery/posters/spider-man-brand-new-day.jpg",
     "created_at": "2026-11-09T09:16:45.368Z",
     "genres": [
       4,
@@ -117,7 +117,7 @@
     "release_date": "2026-11-15",
     "rating": "7.9",
     "popularity": 84,
-    "poster_url": "https://pbs.twimg.com/media/HC4Nds1a0AAsyFU.jpg",
+    "poster_url": "/static/discovery/posters/ramayana.jpg",
     "created_at": "2026-11-09T09:16:45.374Z",
     "genres": [
       2,
@@ -207,7 +207,7 @@
     "release_date": "2023-07-21",
     "rating": "7.5",
     "popularity": 60,
-    "poster_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/4/4a/Oppenheimer_%28film%29.jpg/250px-Oppenheimer_%28film%29.jpg?utm_source=en.wikipedia.org&utm_campaign=parser&utm_content=thumbnail",
+    "poster_url": "/static/discovery/posters/oppenheimer.jpg",
     "created_at": "2026-11-09T09:16:45.402Z",
     "genres": [
       4
@@ -224,7 +224,7 @@
     "release_date": "2023-06-15",
     "rating": "7.7",
     "popularity": 55,
-    "poster_url": "https://m.media-amazon.com/images/M/MV5BODliNWQzNzUtMTE5ZS00YzI5LTkxZGItZDIzNzY3YTFmNjM5XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+    "poster_url": "/static/discovery/posters/wild-india.jpg",
     "created_at": "2026-11-09T09:16:45.407Z",
     "genres": [
       1,
