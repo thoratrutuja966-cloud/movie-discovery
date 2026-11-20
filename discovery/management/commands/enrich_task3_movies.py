@@ -32,7 +32,7 @@ class Command(BaseCommand):
                 "cast": ["Aarav Sen (sample cast)", "Mira Das (sample cast)", "Dev Malhotra (sample cast)"],
                 "certification": "U/A 7+ (demo)", "duration": 118,
                 "description": "A young cartographer follows a map into a kingdom hidden above the clouds. To bring its divided communities together, she must learn why the kingdom's glass bridges are beginning to disappear.",
-                "trailer": "search", "poster": "/static/discovery/posters/the-glass-kingdom.svg",
+                "trailer": "search", "poster": "https://cdn.penguin.co.uk/dam-assets/books/9781473589520/9781473589520-jacket-large.jpg",
             },
             {
                 "title": "A Map of Us", "year": 2025, "catalog_rating": "7.8", "popularity": 44,
