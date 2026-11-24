@@ -1,23 +1,26 @@
 from datetime import date, timedelta
 import logging
-import re
-import uuid
 
+from django.conf import settings
 from django.core.paginator import Paginator
-from django.db import transaction
 from django.db.models import Count, Exists, F, Min, OuterRef, Q
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+import stripe
 
 from .models import (BookingHistory, Genre, Language, Movie, MovieReview, MovieView,
-                     MovieWatch, ReviewReport, Showtime, Theater)
+                     MovieWatch, PaymentTransaction, ReviewReport, Showtime, Theater)
 from .forms import MovieReviewForm, ReviewReportForm, SignUpForm
 from .tickets import render_ticket_pdf
+from .payments import PaymentSetupError, handle_webhook_event, process_checkout_session, start_checkout, stripe_is_configured
+from .reservations import (SEAT_CODES, SeatsUnavailable, expire_stale_holds,
+                           reacquire_booking_hold, reserve_and_create_booking, seat_map)
 
 logger = logging.getLogger(__name__)
 
@@ -103,6 +106,8 @@ def movie_detail(request, pk):
     return render(request, "discovery/movie_detail.html", {
         "movie": movie,
         "showtimes": showtimes,
+        "payments_enabled": stripe_is_configured(),
+        "seat_codes": SEAT_CODES,
         "similar": similar,
         "trending": trending,
         "recent_releases": recent_releases,
@@ -185,34 +190,131 @@ def report_movie_review(request, review_pk):
 
 @login_required
 @require_POST
-def create_demo_booking(request, showtime_id):
-    """Create a confirmed sample booking; real payment verification belongs to task 4."""
-    showtime = get_object_or_404(
-        Showtime.objects.select_related("movie", "theater"),
-        pk=showtime_id,
-        starts_at__gt=timezone.now(),
-    )
-    seats_text = request.POST.get("seats", "")
-    seats = [seat.strip().upper() for seat in seats_text.split(",") if seat.strip()]
-    if not seats or len(seats) > 8 or len(seats) != len(set(seats)) or any(not re.fullmatch(r"[A-Z]{1,2}[0-9]{1,2}", seat) for seat in seats):
-        messages.error(request, "Enter 1–8 different seats, separated by commas (for example A1, A2).")
-        return redirect("movie_detail", pk=showtime.movie_id)
+def create_booking_checkout(request, showtime_id):
+    """Create a pending booking, then redirect to Stripe-hosted test Checkout."""
+    if not stripe_is_configured():
+        messages.error(request, "Secure online payment is not configured yet. Please try again later.")
+        return redirect("movie_detail", pk=get_object_or_404(Showtime, pk=showtime_id).movie_id)
+    raw_seats = request.POST.getlist("seats")
+    seats = [seat.strip().upper() for value in raw_seats for seat in value.split(",") if seat.strip()]
+    try:
+        expire_stale_holds(showtime_id)
+        booking = reserve_and_create_booking(user=request.user, showtime_id=showtime_id, seats=seats)
+    except ValueError as exc:
+        messages.error(request, str(exc))
+        return redirect("movie_detail", pk=get_object_or_404(Showtime, pk=showtime_id).movie_id)
+    except SeatsUnavailable as exc:
+        messages.error(request, str(exc))
+        return redirect("movie_detail", pk=get_object_or_404(Showtime, pk=showtime_id).movie_id)
+    return _redirect_to_checkout(request, booking.pk)
 
-    with transaction.atomic():
-        booking = BookingHistory.objects.create(
-            user=request.user,
-            movie=showtime.movie,
-            showtime=showtime,
-            status=BookingHistory.Status.CONFIRMED,
-            seats=seats,
-            total_amount=showtime.ticket_price * len(seats),
-            payment_reference=f"DEMO-{uuid.uuid4().hex[:12].upper()}",
+
+def seat_availability(request, showtime_id):
+    showtime = get_object_or_404(Showtime, pk=showtime_id, starts_at__gt=timezone.now())
+    expire_stale_holds(showtime.pk)
+    response = JsonResponse({
+        "showtime_id": showtime.pk,
+        "hold_seconds": 120,
+        "seats": seat_map(showtime.pk, request.user.pk if request.user.is_authenticated else None),
+    })
+    response["Cache-Control"] = "no-store"
+    return response
+
+
+@login_required
+@require_POST
+def retry_booking_payment(request, booking_pk):
+    booking = get_object_or_404(BookingHistory, pk=booking_pk, user=request.user)
+    if booking.status == BookingHistory.Status.CONFIRMED:
+        messages.info(request, "This booking is already confirmed.")
+        return redirect("booking_history")
+    if booking.status in {BookingHistory.Status.FAILED, BookingHistory.Status.CANCELLED}:
+        expire_stale_holds(booking.showtime_id)
+        try:
+            booking = reacquire_booking_hold(booking.pk, request.user)
+        except SeatsUnavailable as exc:
+            messages.error(request, str(exc))
+            return redirect("movie_detail", pk=booking.movie_id)
+    return _redirect_to_checkout(request, booking.pk)
+
+
+def _redirect_to_checkout(request, booking_pk):
+    try:
+        checkout_url, state = start_checkout(booking_pk)
+    except PaymentSetupError as exc:
+        messages.error(request, str(exc))
+        return redirect("booking_history")
+    except stripe.StripeError:
+        logger.exception("Stripe Checkout request failed for booking %s", booking_pk)
+        messages.error(request, "Stripe could not start checkout. Use Retry payment in My tickets to safely try again.")
+        return redirect("booking_history")
+    if state == "confirmed":
+        messages.info(request, "This booking is already confirmed.")
+        return redirect("booking_history")
+    if state == "showtime_passed":
+        messages.error(request, "This showtime has already started. Choose another show.")
+        return redirect("booking_history")
+    if state == "hold_expired":
+        messages.error(request, "Your two-minute seat hold expired. Choose seats again from the movie page.")
+        return redirect("booking_history")
+    if not checkout_url:
+        messages.error(request, "Checkout is not available yet. Please retry from My tickets.")
+        return redirect("booking_history")
+    return redirect(checkout_url)
+
+
+@login_required
+def payment_success(request):
+    session_id = request.GET.get("session_id", "")
+    attempt = PaymentTransaction.objects.filter(
+        checkout_session_id=session_id,
+        booking__user=request.user,
+    ).select_related("booking").first()
+    if not attempt:
+        messages.error(request, "We could not match that payment session to your account.")
+        return redirect("booking_history")
+    try:
+        if not stripe_is_configured():
+            raise PaymentSetupError("Payment verification is temporarily unavailable.")
+        session = stripe.checkout.Session.retrieve(session_id, api_key=settings.STRIPE_SECRET_KEY)
+        if not process_checkout_session(session):
+            messages.error(request, "Payment details could not be verified. Please contact support before trying again.")
+        elif BookingHistory.objects.filter(pk=attempt.booking_id, status=BookingHistory.Status.CONFIRMED).exists():
+            messages.success(request, "Payment confirmed. Your ticket is ready in My tickets.")
+        elif PaymentTransaction.objects.filter(
+            pk=attempt.pk,
+            status__in=[PaymentTransaction.Status.REFUND_PENDING, PaymentTransaction.Status.REFUNDED],
+        ).exists():
+            messages.warning(request, "Your seat hold expired before payment completed. No ticket was issued; a refund was requested.")
+        else:
+            messages.info(request, "Payment is still processing. Refresh My tickets in a moment.")
+    except PaymentSetupError as exc:
+        messages.error(request, str(exc))
+    except stripe.StripeError:
+        logger.exception("Could not verify Stripe Checkout session %s", session_id)
+        messages.error(request, "Payment verification is temporarily unavailable. Refresh My tickets shortly.")
+    return redirect("booking_history")
+
+
+@csrf_exempt
+@require_POST
+def stripe_webhook(request):
+    if not settings.STRIPE_WEBHOOK_SECRET.startswith("whsec_"):
+        return HttpResponseServerError("Webhook is not configured.")
+    try:
+        event = stripe.Webhook.construct_event(
+            payload=request.body,
+            sig_header=request.headers.get("Stripe-Signature", ""),
+            secret=settings.STRIPE_WEBHOOK_SECRET,
         )
-        queue_status = {}
-        transaction.on_commit(lambda booking_pk=booking.pk: queue_status.update(queued=_enqueue_ticket_email(booking_pk)))
-
-    email_state = "queued" if queue_status.get("queued") else "unavailable"
-    return redirect(f"/bookings/?booked={booking.pk}&email={email_state}")
+    except (ValueError, stripe.SignatureVerificationError):
+        return HttpResponseBadRequest("Invalid Stripe webhook signature.")
+    try:
+        handle_webhook_event(event)
+    except Exception:
+        logger.exception("Stripe webhook processing failed for event %s", getattr(event, "id", "unknown"))
+        return HttpResponseServerError("Webhook processing failed; Stripe may retry this event.")
+    return HttpResponse(status=200)
 
 
 def _enqueue_ticket_email(booking_pk):
@@ -230,12 +332,22 @@ def _enqueue_ticket_email(booking_pk):
 
 @login_required
 def booking_history(request):
+    stale_showtimes = BookingHistory.objects.filter(
+        user=request.user,
+        status=BookingHistory.Status.PENDING,
+        showtime__isnull=False,
+    ).values_list("showtime_id", flat=True).distinct()
+    for showtime_id in stale_showtimes:
+        expire_stale_holds(showtime_id)
     bookings = list(BookingHistory.objects.filter(user=request.user).select_related(
         "movie", "showtime__theater"
-    ).annotate(watch_confirmed=Exists(MovieWatch.objects.filter(booking_id=OuterRef("pk")))).order_by("-booked_at"))
+    ).prefetch_related("payment_attempts", "seat_reservations").annotate(watch_confirmed=Exists(MovieWatch.objects.filter(booking_id=OuterRef("pk")))).order_by("-booked_at"))
     now = timezone.now()
     for booking in bookings:
         runtime = booking.movie.duration_minutes or 120
+        held_until = [reservation.expires_at for reservation in booking.seat_reservations.all()
+                      if reservation.status == "held" and reservation.expires_at]
+        booking.seat_hold_expires_at = min(held_until) if held_until else None
         booking.can_mark_watched = bool(
             booking.status == BookingHistory.Status.CONFIRMED
             and booking.showtime
@@ -244,8 +356,7 @@ def booking_history(request):
         )
     return render(request, "discovery/booking_history.html", {
         "bookings": bookings,
-        "booked": request.GET.get("booked"),
-        "email_queued": request.GET.get("email") == "queued",
+        "payment_state": request.GET.get("payment", ""),
     })
 
 

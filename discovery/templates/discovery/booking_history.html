@@ -4,15 +4,17 @@
 <section class="booking-history">
   <div class="eyebrow">YOUR CINE NIGHTS</div>
   <h1>My bookings</h1>
-  {% if booked %}<p class="booking-notice">Demo booking confirmed. {% if email_queued %}Your ticket email is queued for delivery.{% else %}Email queue is unavailable right now; you can download the PDF below.{% endif %}</p>{% endif %}
+  {% if payment_state == 'cancelled' %}<p class="booking-notice">Checkout was closed. Your booking is still pending; you can continue payment below.</p>{% elif payment_state == 'success' %}<p class="booking-notice">Payment verified. Your confirmed ticket is available below.</p>{% endif %}
   {% for booking in bookings %}
     <article class="booking-card">
       <div><span class="eyebrow">{{ booking.get_status_display }}</span><h2><a href="{% url 'movie_detail' booking.movie_id %}">{{ booking.movie.title }}</a></h2>
         {% if booking.showtime %}<p>{{ booking.showtime.theater.name }} · {{ booking.showtime.theater.city }} · {{ booking.showtime.starts_at|date:'D, M j · g:i A' }}</p>{% endif %}
         <p>Seats: {{ booking.seats|join:', '|default:'—' }} · Total: ₹{{ booking.total_amount|floatformat:2 }}</p>
-        <small>Booking {{ booking.booking_id }} · Payment ref {{ booking.payment_reference }}</small>
+        {% if booking.seat_hold_expires_at %}<p class="hold-expiry">Seats held until {{ booking.seat_hold_expires_at|date:'g:i:s A' }} (two-minute hold)</p>{% endif %}
+        <small>Booking {{ booking.booking_id }}{% if booking.payment_reference %} · Transaction ref {{ booking.payment_reference }}{% endif %}</small>
+        {% if booking.payment_attempts.all %}<div class="payment-attempts"><small>Payment attempts:</small>{% for attempt in booking.payment_attempts.all %}<small>{{ attempt.get_status_display }} · {{ attempt.payment_intent_id|default:attempt.checkout_session_id|default:'Session starting' }}{% if attempt.refund_id %} · Refund {{ attempt.refund_id }}{% endif %}</small>{% endfor %}</div>{% endif %}
       </div>
-      <div class="booking-actions">{% if booking.can_mark_watched %}<form method="post" action="{% url 'mark_movie_watched' booking.pk %}">{% csrf_token %}<button class="ticket-download" type="submit">Mark watched &amp; review</button></form>{% endif %}{% if booking.status == 'confirmed' %}<a class="ticket-download" href="{% url 'ticket_download' booking.pk %}">Download PDF ticket</a>{% endif %}</div>
+      <div class="booking-actions">{% if booking.can_mark_watched %}<form method="post" action="{% url 'mark_movie_watched' booking.pk %}">{% csrf_token %}<button class="ticket-download" type="submit">Mark watched &amp; review</button></form>{% endif %}{% if booking.status == 'confirmed' %}<a class="ticket-download" href="{% url 'ticket_download' booking.pk %}">Download PDF ticket</a>{% elif booking.status == 'pending' or booking.status == 'failed' or booking.status == 'cancelled' %}<form method="post" action="{% url 'retry_booking_payment' booking.pk %}">{% csrf_token %}<button class="ticket-download" type="submit">{% if booking.status == 'pending' %}Continue payment{% else %}Retry with these seats{% endif %}</button></form>{% endif %}</div>
     </article>
   {% empty %}<p>You don’t have any bookings yet. Pick a film and reserve a showtime to see tickets here.</p>{% endfor %}
 </section>

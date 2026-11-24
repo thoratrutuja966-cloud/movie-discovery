@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import (BookingHistory, CastMember, Genre, Language, Movie, MoviePoster,
-                     MovieReview, MovieView, ReviewReport, Showtime, Theater,
+                     MovieReview, MovieView, PaymentTransaction, PaymentWebhookEvent, ReviewReport, SeatReservation, Showtime, Theater,
                      MovieWatch)
 
 admin.site.site_header = "CineTrail Administration"
@@ -42,6 +42,27 @@ class BookingHistoryAdmin(admin.ModelAdmin):
     search_fields = ("booking_id", "payment_reference", "user__username", "user__email", "movie__title")
     readonly_fields = ("booking_id", "booked_at", "ticket_email_sent_at")
 
+
+@admin.register(PaymentTransaction)
+class PaymentTransactionAdmin(admin.ModelAdmin):
+    list_display = ("id", "booking", "provider", "status", "amount_minor", "currency", "payment_intent_id", "refund_id", "created_at")
+    list_filter = ("provider", "status", "currency", "created_at")
+    search_fields = ("checkout_session_id", "payment_intent_id", "booking__booking_id", "booking__user__email")
+    readonly_fields = ("booking", "provider", "status", "amount_minor", "currency", "checkout_session_id", "payment_intent_id", "refund_id", "refund_error", "idempotency_key", "checkout_url", "expires_at", "error_message", "created_at", "updated_at")
+
+    def has_add_permission(self, request):
+        return False
+
+
+@admin.register(PaymentWebhookEvent)
+class PaymentWebhookEventAdmin(admin.ModelAdmin):
+    list_display = ("event_id", "event_type", "received_at", "processed_at")
+    search_fields = ("event_id", "event_type")
+    readonly_fields = ("event_id", "event_type", "received_at", "processed_at")
+
+    def has_add_permission(self, request):
+        return False
+
 @admin.register(CastMember)
 class CastMemberAdmin(admin.ModelAdmin):
     list_display = ("name",)
@@ -78,3 +99,8 @@ class ReviewReportAdmin(admin.ModelAdmin):
 
 
 admin.site.register((Genre, Theater, Showtime, MovieView, MovieWatch))
+@admin.register(SeatReservation)
+class SeatReservationAdmin(admin.ModelAdmin):
+    list_display = ("showtime", "seat_code", "user", "booking", "status", "expires_at")
+    list_filter = ("status", "showtime__theater__city")
+    search_fields = ("seat_code", "user__username", "user__email", "booking__booking_id", "showtime__movie__title")

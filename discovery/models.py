@@ -131,13 +131,15 @@ class MovieView(models.Model):
 
 class BookingHistory(models.Model):
     class Status(models.TextChoices):
+        PENDING = "pending", "Payment pending"
         CONFIRMED = "confirmed", "Confirmed"
+        FAILED = "failed", "Payment failed"
         CANCELLED = "cancelled", "Cancelled"
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="movie_booking_history")
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name="booking_history")
     showtime = models.ForeignKey(Showtime, on_delete=models.PROTECT, related_name="bookings", null=True, blank=True)
-    status = models.CharField(max_length=12, choices=Status.choices, default=Status.CONFIRMED, db_index=True)
+    status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDING, db_index=True)
     booking_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     payment_reference = models.CharField(max_length=80, blank=True)
     seats = models.JSONField(default=list, blank=True)
@@ -151,6 +153,82 @@ class BookingHistory(models.Model):
         indexes = [models.Index(fields=["user", "status", "-booked_at"])]
 
     def __str__(self): return f"{self.user} · {self.movie} · {self.get_status_display()}"
+
+
+class PaymentTransaction(models.Model):
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        SUCCEEDED = "succeeded", "Succeeded"
+        FAILED = "failed", "Failed"
+        EXPIRED = "expired", "Expired"
+        REFUND_PENDING = "refund_pending", "Refund pending"
+        REFUNDED = "refunded", "Refunded"
+
+    booking = models.ForeignKey(BookingHistory, on_delete=models.PROTECT, related_name="payment_attempts")
+    provider = models.CharField(max_length=20, default="stripe")
+    status = models.CharField(max_length=16, choices=Status.choices, default=Status.PENDING, db_index=True)
+    amount_minor = models.PositiveIntegerField(help_text="Amount in the currency's smallest unit, such as paise.")
+    currency = models.CharField(max_length=3, default="inr")
+    checkout_session_id = models.CharField(max_length=255, unique=True, null=True, blank=True)
+    payment_intent_id = models.CharField(max_length=255, blank=True)
+    refund_id = models.CharField(max_length=255, blank=True)
+    refund_error = models.TextField(blank=True)
+    idempotency_key = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    checkout_url = models.URLField(max_length=1000, blank=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    error_message = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.provider} · {self.booking.booking_id} · {self.get_status_display()}"
+
+
+class PaymentWebhookEvent(models.Model):
+    event_id = models.CharField(max_length=255, unique=True)
+    event_type = models.CharField(max_length=120)
+    received_at = models.DateTimeField(auto_now_add=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-received_at"]
+
+    def __str__(self):
+        return f"{self.event_type} · {self.event_id}"
+
+
+class SeatReservation(models.Model):
+    class Status(models.TextChoices):
+        HELD = "held", "Temporarily held"
+        BOOKED = "booked", "Booked"
+        RELEASED = "released", "Released"
+
+    showtime = models.ForeignKey(Showtime, on_delete=models.CASCADE, related_name="seat_reservations")
+    seat_code = models.CharField(max_length=4)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="seat_reservations")
+    booking = models.ForeignKey(
+        BookingHistory, on_delete=models.CASCADE, related_name="seat_reservations", null=True, blank=True
+    )
+    payment_attempt = models.ForeignKey(
+        PaymentTransaction, on_delete=models.SET_NULL, related_name="seat_reservations", null=True, blank=True
+    )
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.HELD, db_index=True)
+    expires_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["showtime_id", "seat_code"]
+        constraints = [
+            models.UniqueConstraint(fields=["showtime", "seat_code"], name="unique_seat_row_per_showtime"),
+        ]
+        indexes = [models.Index(fields=["showtime", "status", "expires_at"], name="discovery_s_showti_3ac947_idx")]
+
+    def __str__(self):
+        return f"{self.showtime} · {self.seat_code} · {self.get_status_display()}"
 
 class MovieWatch(models.Model):
     """A viewer confirms attendance against a completed, confirmed booking."""

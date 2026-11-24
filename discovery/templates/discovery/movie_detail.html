@@ -22,13 +22,18 @@
       <h3 id="showtimes">Showtimes near you</h3>
       {% for show in showtimes %}
         <div class="showtime"><span><b>{{ show.theater.name }}</b><small>{{ show.theater.city }} · {{ show.starts_at|date:'D, M j · g:i A' }} · {{ show.screen }}</small></span><span>₹{{ show.ticket_price|floatformat:0 }}</span></div>
-        {% if user.is_authenticated %}
-          <form class="booking-form" method="post" action="{% url 'create_demo_booking' show.pk %}">
-            {% csrf_token %}<label for="seats-{{ show.pk }}">Seats (comma separated, up to 8)</label>
-            <div class="booking-controls"><input id="seats-{{ show.pk }}" name="seats" placeholder="A1, A2" required maxlength="40"><button type="submit">Confirm demo booking</button></div>
-            <small>Demo only: no payment is processed. Payment verification is part of a later task.</small>
-          </form>
-        {% else %}<p><a href="{% url 'login' %}?next={{ request.path }}">Sign in</a> to make a demo booking.</p>{% endif %}
+          {% if user.is_authenticated %}
+            <form class="booking-form seat-booking-form" method="post" action="{% url 'create_booking_checkout' show.pk %}">
+              {% csrf_token %}<fieldset class="seat-picker" data-seat-map data-enabled="{{ payments_enabled|yesno:'true,false' }}" data-url="{% url 'seat_availability' show.pk %}"><legend>Choose seats (up to 8)</legend>
+              <p class="seat-screen">SCREEN</p><div class="seat-grid" role="group" aria-label="Available seats for {{ show.theater.name }}">
+                {% for seat in seat_codes %}<label class="seat-label" data-seat-label data-seat="{{ seat }}"><input type="checkbox" name="seats" value="{{ seat }}"><span>{{ seat }}</span></label>{% endfor %}
+              </div><div class="seat-legend"><span><i class="available"></i>Available</span><span><i class="selected"></i>Selected</span><span><i class="reserved"></i>Held</span><span><i class="booked"></i>Booked</span></div>
+              <p class="seat-live-status" data-seat-status aria-live="polite">Loading live availability…</p>
+            </fieldset>
+              <button type="submit" class="seat-submit" disabled>Choose at least one seat</button>
+              {% if payments_enabled %}<small>Selected seats are held for two minutes when you continue to secure test-mode payment.</small>{% else %}<small class="payment-setup-note">Live availability is shown. Secure checkout is being set up, so seats cannot be booked yet.</small>{% endif %}
+            </form>
+        {% else %}<p><a href="{% url 'login' %}?next={{ request.path }}">Sign in</a> to book this show.</p>{% endif %}
       {% empty %}<p>No upcoming shows. Check back soon.</p>{% endfor %}
     </div>
   </div>
@@ -50,4 +55,55 @@
 {% if similar %}<section class="recommendations detail-recommendations"><div class="eyebrow muted">SAME GENRE &amp; LANGUAGE</div><h2>More like <em>this.</em></h2><div class="recommend-row">{% for item in similar %}<a class="recommend-chip" href="{% url 'movie_detail' item.pk %}"><span class="rec-icon">✦</span><span><b>{{ item.title }}</b><small>{{ item.languages.all|join:', ' }} · {{ item.genres.all|join:', ' }}</small></span><span class="arrow">↗</span></a>{% endfor %}</div></section>{% endif %}
 <section class="recommendations detail-recommendations"><div class="eyebrow muted">POPULAR WITH VIEWERS</div><h2>Trending <em>now.</em></h2><div class="recommend-row">{% for item in trending %}<a class="recommend-chip" href="{% url 'movie_detail' item.pk %}"><span class="rec-icon">✦</span><span><b>{{ item.title }}</b><small>★ {{ item.rating }} · {{ item.languages.all|join:', ' }}</small></span><span class="arrow">↗</span></a>{% empty %}<p>More picks coming soon.</p>{% endfor %}</div></section>
 <section class="recommendations detail-recommendations"><div class="eyebrow muted">FRESH RELEASES</div><h2>Recently <em>released.</em></h2><div class="recommend-row">{% for item in recent_releases %}<a class="recommend-chip" href="{% url 'movie_detail' item.pk %}"><span class="rec-icon">✦</span><span><b>{{ item.title }}</b><small>{{ item.release_date|date:'M Y' }} · {{ item.languages.all|join:', ' }}</small></span><span class="arrow">↗</span></a>{% empty %}<p>More picks coming soon.</p>{% endfor %}</div></section>
+<script>
+(() => {
+  const maps = document.querySelectorAll('[data-seat-map]');
+  maps.forEach((map) => {
+    const form = map.closest('form');
+    const status = map.querySelector('[data-seat-status]');
+    const submit = form.querySelector('.seat-submit');
+    const checkboxes = [...map.querySelectorAll('input[type="checkbox"]')];
+    const paymentsEnabled = map.dataset.enabled === 'true';
+    let available = false;
+    const updateSelection = () => {
+      const selected = checkboxes.filter((box) => box.checked && !box.disabled).length;
+      submit.disabled = !available || !paymentsEnabled || selected < 1 || selected > 8;
+      submit.textContent = !paymentsEnabled ? 'Checkout not configured' : (selected ? `Continue with ${selected} seat${selected === 1 ? '' : 's'}` : 'Choose at least one seat');
+      if (selected > 8) status.textContent = 'Choose no more than 8 seats.';
+    };
+    checkboxes.forEach((box) => box.addEventListener('change', () => {
+      const selected = checkboxes.filter((item) => item.checked && !item.disabled);
+      if (selected.length > 8) box.checked = false;
+      updateSelection();
+    }));
+    const refresh = async () => {
+      try {
+        const response = await fetch(map.dataset.url, {headers: {'Accept': 'application/json'}});
+        if (!response.ok) throw new Error('Availability unavailable');
+        const data = await response.json();
+        available = true;
+        let openCount = 0;
+        Object.entries(data.seats).forEach(([seat, info]) => {
+          const label = map.querySelector(`[data-seat="${seat}"]`);
+          if (!label) return;
+          const box = label.querySelector('input');
+          label.dataset.state = info.status;
+          box.disabled = info.status !== 'available';
+          if (info.status !== 'available') box.checked = false;
+          if (info.status === 'available') openCount += 1;
+          label.title = info.status === 'mine' ? 'Held by you' : info.status[0].toUpperCase() + info.status.slice(1);
+        });
+        status.textContent = openCount ? `${openCount} seats available · availability refreshes automatically` : 'No seats are available for this show.';
+        updateSelection();
+      } catch (_) {
+        available = false;
+        status.textContent = 'Could not refresh seat availability. Retrying…';
+        updateSelection();
+      }
+    };
+    refresh();
+    window.setInterval(refresh, 5000);
+  });
+})();
+</script>
 {% endblock %}
