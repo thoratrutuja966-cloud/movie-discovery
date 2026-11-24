@@ -150,7 +150,10 @@ class BookingHistory(models.Model):
 
     class Meta:
         ordering = ["-booked_at"]
-        indexes = [models.Index(fields=["user", "status", "-booked_at"])]
+        indexes = [
+            models.Index(fields=["user", "status", "-booked_at"]),
+            models.Index(fields=["status", "booked_at"], name="booking_status_time_idx"),
+        ]
 
     def __str__(self): return f"{self.user} · {self.movie} · {self.get_status_display()}"
 
@@ -182,6 +185,7 @@ class PaymentTransaction(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [models.Index(fields=["status", "created_at"], name="payment_status_time_idx")]
 
     def __str__(self):
         return f"{self.provider} · {self.booking.booking_id} · {self.get_status_display()}"

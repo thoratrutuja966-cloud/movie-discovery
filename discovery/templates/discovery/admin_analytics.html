@@ -1,0 +1,44 @@
+{% extends "discovery/base.html" %}
+{% block title %}Business analytics · CineTrail{% endblock %}
+{% block content %}
+<style>
+.analytics{max-width:1240px;margin:42px auto 60px;padding:0 24px}.analytics-head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:25px}.analytics h1,.analytics h2{font-family:Manrope,sans-serif;letter-spacing:-1px}.analytics h1{font-size:36px;margin:8px 0}.analytics h2{font-size:18px;margin:0 0 17px}.analytics .sub{color:#77766f;margin:0}.analytics-actions{display:flex;gap:10px;align-items:center}.analytics-button{display:inline-block;background:#20201e;color:#fff;text-decoration:none;border:0;border-radius:7px;padding:11px 15px;font:600 12px 'DM Sans';cursor:pointer}.analytics-button.secondary{background:#f5f2ed;color:#20201e}.analytics-filter{display:flex;align-items:end;gap:12px;background:#faf9f6;border:1px solid #e9e7e0;border-radius:10px;padding:16px;margin-bottom:20px}.analytics-filter label{display:block;font-size:11px;font-weight:700;margin-bottom:6px}.analytics-filter input{height:38px;padding:0 10px;border:1px solid #e5e3dd;border-radius:7px;font:13px 'DM Sans'}.analytics-errors{color:#a13f32;background:#fff2ef;padding:10px 14px;border-radius:7px;margin:0 0 16px}.analytics-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}.metric,.panel{border:1px solid #e9e7e0;border-radius:10px;background:#fff}.metric{padding:18px}.metric span{display:block;color:#77766f;font-size:11px;font-weight:600}.metric strong{display:block;font:700 25px Manrope;margin-top:9px}.metric small{display:block;color:#949188;margin-top:5px;font-size:10px}.analytics-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}.panel{padding:20px;min-width:0}.wide{grid-column:1/-1}.trend-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.trend-section h3{font:700 13px Manrope;margin:0 0 12px}.trend-row{display:grid;grid-template-columns:82px 1fr 95px;gap:8px;align-items:center;margin:9px 0;font-size:10px}.trend-label{color:#77766f}.bar-track{height:8px;background:#f1eee8;border-radius:9px;overflow:hidden}.bar-fill{height:100%;background:#e8794f;border-radius:9px;min-width:2px}.trend-value{text-align:right;font-weight:600;white-space:nowrap}.trend-value small{display:block;color:#888;font-size:9px;font-weight:400}.analytics table{width:100%;border-collapse:collapse;font-size:11px}.analytics th,.analytics td{text-align:left;padding:10px 7px;border-bottom:1px solid #efeee9}.analytics th{font-size:10px;color:#77766f;font-weight:700}.analytics td:last-child,.analytics th:last-child{text-align:right}.hour-list{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.hour-pill{background:#faf9f6;border-radius:7px;padding:9px;text-align:center;font-size:10px}.hour-pill b{display:block;margin-bottom:4px}.empty-note{color:#888;font-size:12px}.private-note{font-size:10px;color:#89867f;margin-top:16px}@media(max-width:900px){.analytics-cards{grid-template-columns:repeat(2,1fr)}.trend-tabs{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.analytics{margin-top:25px;padding:0 5vw}.analytics-head{display:block}.analytics-actions{margin-top:15px}.analytics-filter{display:grid;grid-template-columns:1fr 1fr}.analytics-filter button{grid-column:1/-1}.analytics-grid{grid-template-columns:1fr}.wide{grid-column:auto}.trend-tabs{grid-template-columns:1fr}.hour-list{grid-template-columns:repeat(3,1fr)}.table-wrap{overflow-x:auto}}
+</style>
+<div class="analytics">
+  <header class="analytics-head">
+    <div><span class="eyebrow">CINETRAIL · STAFF ONLY</span><h1>Business analytics</h1><p class="sub">Booking performance from {{ start|date:"M j, Y" }} to {{ end|date:"M j, Y" }}</p></div>
+    <div class="analytics-actions"><a class="analytics-button secondary" href="{% url 'admin:index' %}">Django admin</a><a class="analytics-button" href="?start={{ start|date:'Y-m-d' }}&amp;end={{ end|date:'Y-m-d' }}&amp;export=csv">Export CSV</a></div>
+  </header>
+  <form method="get" class="analytics-filter">
+    <div><label for="start">Start date</label><input id="start" name="start" type="date" value="{{ start|date:'Y-m-d' }}"></div>
+    <div><label for="end">End date</label><input id="end" name="end" type="date" value="{{ end|date:'Y-m-d' }}"></div>
+    <button class="analytics-button" type="submit">Apply range</button>
+  </form>
+  {% if errors %}<div class="analytics-errors">{% for error in errors %}<div>{{ error }}</div>{% endfor %}</div>{% endif %}
+  <section class="analytics-cards" aria-label="Summary metrics">
+    <article class="metric"><span>Confirmed revenue</span><strong>₹{{ revenue|floatformat:2 }}</strong><small>{{ confirmed_count }} confirmed bookings</small></article>
+    <article class="metric"><span>New users</span><strong>{{ new_users }}</strong><small>Accounts created in this range</small></article>
+    <article class="metric"><span>Cancellations &amp; failed</span><strong>{{ cancelled_count|add:failed_count }}</strong><small>{{ cancelled_count }} cancelled · {{ failed_count }} failed</small></article>
+    <article class="metric"><span>Refunds</span><strong>₹{{ refund_total|floatformat:2 }}</strong><small>{{ refund_count }} pending or completed refund cases</small></article>
+  </section>
+
+  <section class="panel wide" style="margin-bottom:16px"><h2>Revenue and booking trends</h2>
+    <div class="trend-tabs">
+      {% for title, trends in trend_sections %}
+      <div class="trend-section"><h3>{{ title }}</h3>
+        {% for row in trends %}<div class="trend-row"><span class="trend-label">{{ row.period_label }}</span><div class="bar-track" title="{{ row.bookings }} bookings"><div class="bar-fill" style="width:{{ row.bar_percent }}%"></div></div><span class="trend-value">₹{{ row.revenue|floatformat:0 }}<small>{{ row.bookings }} bookings</small></span></div>{% empty %}<p class="empty-note">No confirmed bookings in this period.</p>{% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <div class="analytics-grid">
+    <section class="panel"><h2>Most booked movies</h2><div class="table-wrap"><table><thead><tr><th>Movie</th><th>Bookings</th><th>Revenue</th></tr></thead><tbody>{% for row in movies %}<tr><td>{{ row.movie__title }}</td><td>{{ row.booking_count }}</td><td>₹{{ row.revenue|floatformat:2 }}</td></tr>{% empty %}<tr><td colspan="3" class="empty-note">No confirmed bookings for this range.</td></tr>{% endfor %}</tbody></table></div></section>
+    <section class="panel"><h2>Top performing theaters</h2><div class="table-wrap"><table><thead><tr><th>Theater</th><th>Bookings</th><th>Revenue</th></tr></thead><tbody>{% for row in theaters %}<tr><td>{{ row.theater__name }} <small>· {{ row.theater__city }}</small></td><td>{{ row.booking_count }}</td><td>₹{{ row.revenue|floatformat:2 }}</td></tr>{% empty %}<tr><td colspan="3" class="empty-note">No showtimes in this range.</td></tr>{% endfor %}</tbody></table></div></section>
+    <section class="panel wide"><h2>Theater occupancy</h2><div class="table-wrap"><table><thead><tr><th>Theater</th><th>Showtimes</th><th>Booked seats</th><th>Seat capacity</th><th>Occupancy</th></tr></thead><tbody>{% for row in theaters %}<tr><td>{{ row.theater__name }} · {{ row.theater__city }}</td><td>{{ row.show_count }}</td><td>{{ row.booked_seats }}</td><td>{{ row.capacity }}</td><td>{{ row.occupancy|floatformat:1 }}%</td></tr>{% empty %}<tr><td colspan="5" class="empty-note">No showtimes in this range.</td></tr>{% endfor %}</tbody></table></div><p class="private-note">Occupancy counts booked seats against the 80-seat auditorium map for showtimes in the selected dates.</p></section>
+    <section class="panel"><h2>Peak booking hours</h2><div class="hour-list">{% for row in peak_hours %}<div class="hour-pill"><b>{{ row.hour|stringformat:'02d' }}:00</b>{{ row.booking_count }} bookings</div>{% empty %}<p class="empty-note">No bookings in this range.</p>{% endfor %}</div></section>
+    <section class="panel"><h2>User growth</h2><div class="table-wrap"><table><thead><tr><th>Month</th><th>New accounts</th></tr></thead><tbody>{% for row in user_growth %}<tr><td>{{ row.period_label }}</td><td>{{ row.users }}</td></tr>{% empty %}<tr><td colspan="2" class="empty-note">No new accounts in this range.</td></tr>{% endfor %}</tbody></table></div></section>
+  </div>
+  <p class="private-note">Analytics are aggregated in the database. This dashboard is restricted to active Django staff users.</p>
+</div>
+{% endblock %}

@@ -1,12 +1,16 @@
-from datetime import date, timedelta
+import csv
+from datetime import date, datetime, time, timedelta
 import logging
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.contrib.admin.views.decorators import staff_member_required
 from django.core.paginator import Paginator
-from django.db.models import Count, Exists, F, Min, OuterRef, Q
+from django.db.models import Count, Exists, F, Min, OuterRef, Q, Sum
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.db.models.functions import ExtractHour, TruncDay, TruncMonth, TruncWeek, TruncYear
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
@@ -23,6 +27,201 @@ from .reservations import (SEAT_CODES, SeatsUnavailable, expire_stale_holds,
                            reacquire_booking_hold, reserve_and_create_booking, seat_map)
 
 logger = logging.getLogger(__name__)
+
+
+def _analytics_date_range(request):
+    today = timezone.localdate()
+    default_start = today - timedelta(days=29)
+    errors = []
+
+    def parse_date(key, default):
+        raw = request.GET.get(key)
+        if not raw:
+            return default
+        try:
+            return date.fromisoformat(raw)
+        except ValueError:
+            errors.append(f"{key.title()} date must use YYYY-MM-DD format.")
+            return default
+
+    start = parse_date("start", default_start)
+    end = parse_date("end", today)
+    if start > end:
+        errors.append("Start date must be on or before end date.")
+        start, end = default_start, today
+    start_at = timezone.make_aware(datetime.combine(start, time.min))
+    end_at = timezone.make_aware(datetime.combine(end + timedelta(days=1), time.min))
+    return start, end, start_at, end_at, errors
+
+
+def _analytics_report(request):
+    start, end, start_at, end_at, errors = _analytics_date_range(request)
+    bookings = BookingHistory.objects.filter(booked_at__gte=start_at, booked_at__lt=end_at)
+    confirmed = bookings.filter(status=BookingHistory.Status.CONFIRMED)
+    summary = bookings.aggregate(
+        confirmed_count=Count("id", filter=Q(status=BookingHistory.Status.CONFIRMED)),
+        revenue=Sum("total_amount", filter=Q(status=BookingHistory.Status.CONFIRMED)),
+        failed_count=Count("id", filter=Q(status=BookingHistory.Status.FAILED)),
+        cancelled_count=Count("id", filter=Q(status=BookingHistory.Status.CANCELLED)),
+    )
+    refunds = PaymentTransaction.objects.filter(
+        created_at__gte=start_at,
+        created_at__lt=end_at,
+        status__in=[PaymentTransaction.Status.REFUND_PENDING, PaymentTransaction.Status.REFUNDED],
+    ).aggregate(count=Count("id"), amount_minor=Sum("amount_minor"))
+
+    periods = []
+    period_queries = (
+        ("Daily", TruncDay("booked_at")),
+        ("Weekly", TruncWeek("booked_at")),
+        ("Monthly", TruncMonth("booked_at")),
+        ("Yearly", TruncYear("booked_at")),
+    )
+    for label, truncation in period_queries:
+        grouped = list(confirmed.annotate(period=truncation).values("period").annotate(
+            bookings=Count("id"), revenue=Sum("total_amount")
+        ).order_by("period"))
+        for row in grouped:
+            row["period_label"] = timezone.localtime(row["period"]).strftime(
+                "%d %b %Y" if label in {"Daily", "Weekly"} else "%b %Y" if label == "Monthly" else "%Y"
+            )
+        periods.extend({**row, "group": label} for row in grouped)
+    period_trends = {}
+    for label in ("Daily", "Weekly", "Monthly", "Yearly"):
+        grouped = [row for row in periods if row["group"] == label]
+        visible = grouped[-30:] if label == "Daily" else grouped[-16:] if label == "Weekly" else grouped[-12:] if label == "Monthly" else grouped[-8:]
+        maximum = max((row["revenue"] or 0 for row in visible), default=0)
+        for row in visible:
+            row["bar_percent"] = int(row["revenue"] * 100 / maximum) if maximum else 0
+        period_trends[label.lower()] = visible
+
+    movies = list(confirmed.values("movie_id", "movie__title").annotate(
+        booking_count=Count("id"), revenue=Sum("total_amount")
+    ).order_by("-booking_count", "movie__title")[:10])
+
+    theater_bookings = {
+        row["showtime__theater_id"]: row
+        for row in confirmed.filter(showtime__isnull=False).values("showtime__theater_id").annotate(
+            booking_count=Count("id"), revenue=Sum("total_amount")
+        )
+    }
+    show_stats = {row["theater_id"]: row for row in Showtime.objects.filter(
+        starts_at__gte=start_at, starts_at__lt=end_at
+    ).values("theater_id").annotate(
+        show_count=Count("id"),
+        booked_seats=Count("seat_reservations", filter=Q(
+            seat_reservations__status="booked"
+        )),
+    )}
+    theaters = []
+    for theater_id, name, city in Theater.objects.order_by("city", "name").values_list("id", "name", "city"):
+        row = show_stats.get(theater_id, {"show_count": 0, "booked_seats": 0})
+        performance = theater_bookings.get(theater_id, {})
+        capacity = row["show_count"] * len(SEAT_CODES)
+        theaters.append({
+            "theater_id": theater_id,
+            "theater__name": name,
+            "theater__city": city,
+            "show_count": row["show_count"],
+            "booked_seats": row["booked_seats"],
+            "booking_count": performance.get("booking_count", 0),
+            "revenue": performance.get("revenue") or 0,
+            "occupancy": (row["booked_seats"] * 100 / capacity) if capacity else 0,
+            "capacity": capacity,
+        })
+    theaters.sort(key=lambda row: (-row["revenue"], row["theater__city"], row["theater__name"]))
+
+    peak_hours = list(bookings.annotate(hour=ExtractHour("booked_at")).values("hour").annotate(
+        booking_count=Count("id")
+    ).order_by("hour"))
+    user_model = get_user_model()
+    user_growth = list(user_model.objects.filter(
+        date_joined__gte=start_at, date_joined__lt=end_at
+    ).annotate(period=TruncMonth("date_joined")).values("period").annotate(
+        users=Count("id")
+    ).order_by("period"))
+    for row in user_growth:
+        row["period_label"] = timezone.localtime(row["period"]).strftime("%b %Y")
+    new_users = sum(row["users"] for row in user_growth)
+
+    return {
+        "start": start,
+        "end": end,
+        "errors": errors,
+        "confirmed_count": summary["confirmed_count"] or 0,
+        "revenue": summary["revenue"] or 0,
+        "failed_count": summary["failed_count"] or 0,
+        "cancelled_count": summary["cancelled_count"] or 0,
+        "refund_count": refunds["count"] or 0,
+        "refund_total": (refunds["amount_minor"] or 0) / 100,
+        "new_users": new_users,
+        "periods": periods,
+        "period_trends": period_trends,
+        "trend_sections": [
+            ("Daily", period_trends["daily"]),
+            ("Weekly", period_trends["weekly"]),
+            ("Monthly", period_trends["monthly"]),
+            ("Yearly", period_trends["yearly"]),
+        ],
+        "movies": movies,
+        "theaters": theaters,
+        "peak_hours": peak_hours,
+        "user_growth": user_growth,
+    }
+
+
+@staff_member_required
+def admin_analytics(request):
+    report = _analytics_report(request)
+    if request.GET.get("export") == "csv":
+        response = HttpResponse(content_type="text/csv; charset=utf-8")
+        response["Cache-Control"] = "private, no-store"
+        response["Content-Disposition"] = (
+            f'attachment; filename="cinetrail-analytics-{report["start"]}-to-{report["end"]}.csv"'
+        )
+        response.write("\ufeff")
+        writer = csv.writer(response)
+        writer.writerow(["CineTrail analytics", report["start"], report["end"]])
+        writer.writerow(["Summary metric", "Value"])
+        for label, value in (
+            ("Confirmed bookings", report["confirmed_count"]),
+            ("Revenue (INR)", report["revenue"]),
+            ("Failed bookings", report["failed_count"]),
+            ("Cancelled bookings", report["cancelled_count"]),
+            ("Refund cases", report["refund_count"]),
+            ("Refund amount (INR)", report["refund_total"]),
+            ("New users", report["new_users"]),
+        ):
+            writer.writerow([label, value])
+        writer.writerow([])
+        writer.writerow(["Revenue trend", "Period", "Confirmed bookings", "Revenue (INR)"])
+        for row in report["periods"]:
+            writer.writerow([row["group"], row["period_label"], row["bookings"], row["revenue"]])
+        writer.writerow([])
+        writer.writerow(["Movie", "Confirmed bookings", "Revenue (INR)"])
+        for row in report["movies"]:
+            writer.writerow([_safe_csv_text(row["movie__title"]), row["booking_count"], row["revenue"]])
+        writer.writerow([])
+        writer.writerow(["Theater", "City", "Showtimes", "Booked seats", "Capacity", "Occupancy %", "Bookings", "Revenue (INR)"])
+        for row in report["theaters"]:
+            writer.writerow([_safe_csv_text(row["theater__name"]), _safe_csv_text(row["theater__city"]), row["show_count"], row["booked_seats"], row["capacity"], f'{row["occupancy"]:.1f}', row["booking_count"], row["revenue"]])
+        writer.writerow([])
+        writer.writerow(["Peak booking hour (24h)", "Bookings"])
+        for row in report["peak_hours"]:
+            writer.writerow([row["hour"], row["booking_count"]])
+        writer.writerow([])
+        writer.writerow(["User growth month", "New users"])
+        for row in report["user_growth"]:
+            writer.writerow([row["period_label"], row["users"]])
+        return response
+    response = render(request, "discovery/admin_analytics.html", report)
+    response["Cache-Control"] = "private, no-store"
+    return response
+
+
+def _safe_csv_text(value):
+    text = str(value or "")
+    return f"'{text}" if text.startswith(("=", "+", "-", "@", "\t", "\r")) else text
 
 SORTS = {"popular": "-popularity", "newest": "-release_date", "rating": "-rating", "price": "showtimes__ticket_price"}
 
