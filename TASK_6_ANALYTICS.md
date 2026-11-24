@@ -11,9 +11,15 @@
 
 The report uses Django ORM `Count`, `Sum`, date truncation, and filtered aggregates. It asks the database for grouped totals and transfers only summary rows to Django rather than loading individual booking or payment records into Python. Theater occupancy is aggregated from showtimes and booked seat-reservation rows; capacity is based on the current 80-seat auditorium map. The page limits displayed trend buckets while the CSV keeps the full selected range.
 
-Migration `0008_analytics_indexes` adds composite indexes on `(status, booked_at)` for booking status/date filters and `(status, created_at)` for refund/payment status/date filters. Existing indexes on `Showtime.starts_at` and `BookingHistory.booked_at` also support the date-range lookups. These choices reduce rows examined for common status-and-date queries and keep aggregation in the database.
+Migration `0008_analytics_indexes` adds composite indexes on `(status, booked_at)` for booking status/date filters and `(status, created_at)` for refund/payment status/date filters. Existing indexes on `Showtime.starts_at` and `BookingHistory.booked_at` also support the date-range lookups. These choices let the database narrow common status-and-date queries using index ranges and keep aggregation in the database.
 
-No 100,000-booking benchmark was run as part of this change. Before making a performance claim for a particular hosting database, run a production-like benchmark with representative data and inspect the database query plan. SQLite is suitable for local development but is not the concurrency/performance target for large live booking volumes.
+## 100,000-row benchmark
+
+Run `python tools/benchmark_task6.py` to create 100,000 synthetic booking rows in an in-memory SQLite database, compare date-range aggregates before and after the same single-column and composite indexes used by the app, and print query plans. Increase the size with `--rows 250000` or the sample count with `--repetitions 10`. The benchmark is reproducible and does not read or modify the app database.
+
+On the development machine for this report, the seven-run median was 2.57 ms for a date-range aggregate without indexes and 0.29 ms with the `booked_at` index; the confirmed date-range aggregate was 4.33 ms without indexes and 0.19 ms with `(status, booked_at)`. SQLite's query plan changed from a table scan to index range searches for both query shapes.
+
+This benchmark demonstrates the index access path and local SQLite query shape only. Its timings are machine-specific and are not a production PostgreSQL throughput claim. For deployment-scale evidence, repeat against an isolated PostgreSQL database on the target hosting plan with representative bookings, showtimes, reservations, and users; record its query plan and timings.
 
 ## Admin account security
 
