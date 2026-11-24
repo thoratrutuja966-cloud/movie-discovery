@@ -23,9 +23,10 @@ class Command(BaseCommand):
             ("Red Line", "A detective has one train ride to stop a planned heist.", "Tamil", 2024, 7.9, 49, ["Action", "Thriller"], "red-line.svg"),
             ("A Map of Us", "Old friends take the scenic route home after a wedding.", "Marathi", 2025, 7.8, 44, ["Drama", "Comedy"], "a-map-of-us.svg"),
         ]
+        unpublished_titles = {"Little Comets", "Red Line", "A Map of Us"}
         for title, synopsis, language, year, rating, popularity, tags, poster in data:
             language_rows = [Language.objects.get_or_create(name=name.strip())[0] for name in language.split(",") if name.strip()]
-            movie, _ = Movie.objects.update_or_create(title=title, defaults={"synopsis": synopsis, "language": ", ".join(item.name for item in language_rows), "release_date": date(year, 6, 15), "rating": Decimal(str(rating)), "catalog_rating": Decimal(str(rating)), "popularity": popularity, "poster_url": f"/static/discovery/posters/{poster}"})
+            movie, _ = Movie.objects.update_or_create(title=title, defaults={"is_published": title not in unpublished_titles, "synopsis": synopsis, "language": ", ".join(item.name for item in language_rows), "release_date": date(year, 6, 15), "rating": Decimal(str(rating)), "catalog_rating": Decimal(str(rating)), "popularity": popularity, "poster_url": f"/static/discovery/posters/{poster}"})
             movie.languages.set(language_rows)
             movie.genres.set([genres[t] for t in tags if t in genres])
         theaters = [Theater.objects.get_or_create(name=name, city=city)[0] for name, city in [("CineSquare", "Mumbai"), ("Northstar Screens", "Delhi"), ("Riverwalk Cinema", "Pune"), ("Metroplex", "Bengaluru")]]

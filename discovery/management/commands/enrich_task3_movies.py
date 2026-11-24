@@ -89,6 +89,11 @@ class Command(BaseCommand):
             },
         ]
 
+        # These three records are fictional placeholders, not verified film listings.
+        # Keep them in the database for existing references, but don't enrich/re-publish them.
+        unpublished_titles = {"Little Comets", "Red Line", "A Map of Us"}
+        catalogue = [item for item in catalogue if item["title"] not in unpublished_titles]
+
         extra_genres = ["Documentary", "Nature", "Biography", "History"]
         for name in extra_genres:
             Genre.objects.get_or_create(name=name, defaults={"slug": name.lower().replace(" ", "-")})

@@ -13,13 +13,13 @@ class MoviePosterInline(admin.TabularInline):
 
 @admin.register(Movie)
 class MovieAdmin(admin.ModelAdmin):
-    list_display = ("title", "language_display", "certification", "duration_minutes", "rating", "popularity")
-    list_filter = ("languages", "genres")
+    list_display = ("title", "is_published", "language_display", "certification", "duration_minutes", "rating", "popularity")
+    list_filter = ("is_published", "languages", "genres")
     search_fields = ("title", "synopsis", "description", "cast_members__name")
     filter_horizontal = ("genres", "cast_members", "languages")
     readonly_fields = ("rating", "created_at")
     fieldsets = (
-        ("Film", {"fields": ("title", "synopsis", "description", "genres", "languages", "release_date", "certification", "duration_minutes", "cast_members")}),
+        ("Film", {"fields": ("title", "is_published", "synopsis", "description", "genres", "languages", "release_date", "certification", "duration_minutes", "cast_members")}),
         ("Artwork and trailer", {"fields": ("poster_url", "trailer_url")}),
         ("Ratings and discovery", {"fields": ("catalog_rating", "rating", "popularity", "created_at")}),
     )

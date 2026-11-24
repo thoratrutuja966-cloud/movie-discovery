@@ -227,7 +227,7 @@ SORTS = {"popular": "-popularity", "newest": "-release_date", "rating": "-rating
 
 def movie_list(request):
     params = request.GET
-    movies = Movie.objects.all().prefetch_related("genres", "languages").annotate(
+    movies = Movie.objects.filter(is_published=True).prefetch_related("genres", "languages").annotate(
         min_price=Min("showtimes__ticket_price"),
         next_show=Min("showtimes__starts_at", filter=Q(showtimes__starts_at__gte=timezone.now())),
         cities_count=Count("showtimes__theater__city", distinct=True),
@@ -266,25 +266,25 @@ def movie_list(request):
             view_score=Count("movies__view_events", filter=Q(movies__view_events__user=request.user), distinct=True),
             booking_score=Count("movies__booking_history", filter=Q(movies__booking_history__user=request.user, movies__booking_history__status=BookingHistory.Status.CONFIRMED), distinct=True),
         ).annotate(score=F("view_score") + 2 * F("booking_score")).filter(score__gt=0).order_by("-score", "name").values("id")[:3]
-        recommendations = Movie.objects.exclude(pk__in=interacted_ids).filter(genres__in=favorite_genres).annotate(
+        recommendations = Movie.objects.filter(is_published=True).exclude(pk__in=interacted_ids).filter(genres__in=favorite_genres).annotate(
             shared=Count("genres", distinct=True),
         ).order_by("-shared", "-popularity").distinct()[:4]
     return render(request, "discovery/movie_list.html", {"movies": page, "page_obj": page, "match_count": match_count,
-        "featured_movies": Movie.objects.order_by("-popularity", "title")[:3],
+        "featured_movies": Movie.objects.filter(is_published=True).order_by("-popularity", "title")[:3],
         "genres": Genre.objects.order_by("name"), "languages": Language.objects.order_by("name"),
         "cities": Theater.objects.order_by("city").values_list("city", flat=True).distinct(), "theaters": Theater.objects.order_by("name"),
         "recommendations": recommendations, "filters": params, "sorts": [("popular", "Popularity"), ("newest", "Newest releases"), ("rating", "Top rated"), ("price", "Ticket price")], "today": timezone.localdate()} )
 
 def movie_detail(request, pk):
-    movie = get_object_or_404(Movie.objects.prefetch_related("genres", "poster_images", "cast_members"), pk=pk)
+    movie = get_object_or_404(Movie.objects.filter(is_published=True).prefetch_related("genres", "poster_images", "cast_members"), pk=pk)
     if request.user.is_authenticated:
         MovieView.objects.create(user=request.user, movie=movie)
     showtimes = Showtime.objects.filter(movie=movie, starts_at__gte=timezone.now()).select_related("theater").order_by("starts_at")
-    similar = Movie.objects.filter(genres__in=movie.genres.all()).filter(
+    similar = Movie.objects.filter(is_published=True, genres__in=movie.genres.all()).filter(
         languages__in=movie.languages.all()
     ).exclude(pk=movie.pk).prefetch_related("genres", "languages").distinct().order_by("-popularity")[:4]
-    trending = Movie.objects.exclude(pk=movie.pk).prefetch_related("genres").order_by("-popularity", "title")[:4]
-    recent_releases = Movie.objects.exclude(pk=movie.pk).prefetch_related("genres").order_by("-release_date", "title")[:4]
+    trending = Movie.objects.filter(is_published=True).exclude(pk=movie.pk).prefetch_related("genres").order_by("-popularity", "title")[:4]
+    recent_releases = Movie.objects.filter(is_published=True).exclude(pk=movie.pk).prefetch_related("genres").order_by("-release_date", "title")[:4]
     review_form = None
     can_review = False
     pending_watches = []
@@ -340,7 +340,7 @@ def mark_movie_watched(request, booking_pk):
 @login_required
 @require_POST
 def submit_movie_review(request, pk):
-    movie = get_object_or_404(Movie, pk=pk)
+    movie = get_object_or_404(Movie, pk=pk, is_published=True)
     watched_booking = MovieWatch.objects.filter(
         user=request.user, booking__movie=movie, booking__status=BookingHistory.Status.CONFIRMED,
     ).select_related("booking").order_by("-watched_at").first()
@@ -391,9 +391,10 @@ def report_movie_review(request, review_pk):
 @require_POST
 def create_booking_checkout(request, showtime_id):
     """Create a pending booking, then redirect to Stripe-hosted test Checkout."""
+    showtime = get_object_or_404(Showtime, pk=showtime_id, movie__is_published=True)
     if not stripe_is_configured():
         messages.error(request, "Secure online payment is not configured yet. Please try again later.")
-        return redirect("movie_detail", pk=get_object_or_404(Showtime, pk=showtime_id).movie_id)
+        return redirect("movie_detail", pk=showtime.movie_id)
     raw_seats = request.POST.getlist("seats")
     seats = [seat.strip().upper() for value in raw_seats for seat in value.split(",") if seat.strip()]
     try:
@@ -401,15 +402,15 @@ def create_booking_checkout(request, showtime_id):
         booking = reserve_and_create_booking(user=request.user, showtime_id=showtime_id, seats=seats)
     except ValueError as exc:
         messages.error(request, str(exc))
-        return redirect("movie_detail", pk=get_object_or_404(Showtime, pk=showtime_id).movie_id)
+        return redirect("movie_detail", pk=showtime.movie_id)
     except SeatsUnavailable as exc:
         messages.error(request, str(exc))
-        return redirect("movie_detail", pk=get_object_or_404(Showtime, pk=showtime_id).movie_id)
+        return redirect("movie_detail", pk=showtime.movie_id)
     return _redirect_to_checkout(request, booking.pk)
 
 
 def seat_availability(request, showtime_id):
-    showtime = get_object_or_404(Showtime, pk=showtime_id, starts_at__gt=timezone.now())
+    showtime = get_object_or_404(Showtime, pk=showtime_id, starts_at__gt=timezone.now(), movie__is_published=True)
     expire_stale_holds(showtime.pk)
     response = JsonResponse({
         "showtime_id": showtime.pk,

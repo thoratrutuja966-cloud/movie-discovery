@@ -237,6 +237,7 @@
   "pk": 10,
   "fields": {
     "title": "Little Comets",
+    "is_published": false,
     "synopsis": "A spirited animation about finding your place in the universe.",
     "language": "English",
     "release_date": "2025-06-15",
@@ -255,6 +256,7 @@
   "pk": 11,
   "fields": {
     "title": "Red Line",
+    "is_published": false,
     "synopsis": "A detective has one train ride to stop a planned heist.",
     "language": "Tamil",
     "release_date": "2024-06-15",
@@ -273,6 +275,7 @@
   "pk": 12,
   "fields": {
     "title": "A Map of Us",
+    "is_published": false,
     "synopsis": "Old friends take the scenic route home after a wedding.",
     "language": "Marathi",
     "release_date": "2025-06-15",

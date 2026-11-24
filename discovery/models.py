@@ -33,6 +33,7 @@ class Language(models.Model):
 
 class Movie(models.Model):
     title = models.CharField(max_length=180, db_index=True)
+    is_published = models.BooleanField(default=True, help_text="Show this movie in the public catalogue and allow new bookings.")
     synopsis = models.TextField()
     genres = models.ManyToManyField(Genre, related_name="movies")
     language = models.CharField(max_length=120, blank=True, default="", db_index=True, help_text="Automatically updated from selected languages.")
